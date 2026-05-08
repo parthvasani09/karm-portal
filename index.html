@@ -423,9 +423,19 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       <div class="card" style="background:#FFF9E6; border-color:#FDEBD0; margin-bottom:1.5rem;">
         <div class="ct" style="color:#E67E22; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
           <span>📊 Custom Period GST Summary</span>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <span style="font-size:12px; color:#A0B2C6;">From:</span><input type="date" id="rep-start" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
-            <span style="font-size:12px; color:#A0B2C6;">To:</span><input type="date" id="rep-end" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <span style="font-size:12px; color:#A0B2C6;">From:</span>
+            <input type="date" id="rep-start" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
+            
+            <span style="font-size:12px; color:#A0B2C6;">To:</span>
+            <input type="date" id="rep-end" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
+            
+            <select id="rep-status-filter" style="border-color:#FDEBD0; background:#fff; padding:6px 10px; font-size:12px; border-radius:6px;" onchange="renderReports()">
+              <option value="all">All Bills</option>
+              <option value="paid">Only Received (Paid)</option>
+              <option value="pending">Only Pending</option>
+            </select>
+
             <button class="btn" style="background:#FFF3E0; color:#E67E22; border:none; padding:6px 12px; font-size:12px;" onclick="exportReportToExcel()">📊 Download Excel</button>
           </div>
         </div>
@@ -495,8 +505,6 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 // ==========================================
 const OFFICE_USER = "admin@karm.in";
 const OFFICE_PASS = "KARM@2026";
-
-// YOUR CLOUD DATABASE URL
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0azKXbpxO9Hp1ckYcTACNGv2MhplHyFsRMuJcNqriXImRZrWOxweUgHr41ca8WDUP/exec"; 
 
 var bills = []; var expenses = []; var clientDB = []; var items = []; var editId = null;
@@ -518,8 +526,6 @@ function showGlobalToast(msg, type) {
     toast.style.background = type === 'ok' ? '#27AE60' : (type === 'err' ? '#C0392B' : '#2980B9');
     toast.style.display = 'block';
     toast.style.opacity = '1';
-    
-    // Auto hide after 3 seconds unless it's a loading message
     if (type !== 'inf') {
         setTimeout(function() {
             toast.style.opacity = '0';
@@ -539,7 +545,7 @@ function checkLogin() {
         document.getElementById('main-app').style.display = 'block';
         sessionStorage.setItem('karm_auth', 'true');
         loadLocalData();
-        syncFromCloud(); // <--- Auto-sync trigger on login
+        syncFromCloud(); 
     } else {
         document.getElementById('login-err').style.display = 'block';
     }
@@ -554,7 +560,7 @@ if(sessionStorage.getItem('karm_auth') === 'true') {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
     loadLocalData();
-    syncFromCloud(); // <--- Auto-sync trigger on page refresh
+    syncFromCloud(); 
 }
 
 // ==========================================
@@ -562,12 +568,11 @@ if(sessionStorage.getItem('karm_auth') === 'true') {
 // ==========================================
 function syncFromCloud() {
     showGlobalToast("🔄 Auto-syncing from Cloud...", "inf");
-
     fetch(GOOGLE_SCRIPT_URL + "?action=getBills")
       .then(response => response.json())
       .then(data => {
          if(Array.isArray(data)) {
-            bills = data; // Merge live cloud data
+            bills = data; 
             localStorage.setItem('karm_bills', JSON.stringify(bills));
             renderBills();
             updateClientFilter();
@@ -754,7 +759,6 @@ function saveBill() {
   var d = getData(); if(!d.billNo) { showSt('Enter Bill No.', 'err'); return; }
   store(d); editId = d.id; updateClientFilter(); updateLedgerDropdown(); showSt('✓ Saving...', 'inf');
   
-  // Push to Cloud
   fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })
     .then(() => { showSt('✓ Synced to Cloud!', 'ok'); syncFromCloud(); })
     .catch(() => showSt('Local saved (Cloud unreachable).', 'err'));
@@ -775,7 +779,6 @@ function confirmPayment() {
   
   localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); closePaymentModal();
   
-  // Sync Payment Status to Cloud Immediately
   showGlobalToast("🔄 Syncing payment to Cloud...", "inf");
   fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bill) })
     .then(() => showGlobalToast('✅ Payment Synced!', 'ok'));
@@ -787,7 +790,6 @@ function unmarkPayment() {
   
   localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); closePaymentModal();
   
-  // Sync Reverted Status to Cloud Immediately
   showGlobalToast("🔄 Syncing update to Cloud...", "inf");
   fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bill) })
     .then(() => showGlobalToast('✅ Reverted to Pending!', 'ok'));
@@ -834,16 +836,36 @@ function generateLedger() {
   document.getElementById('led-total').textContent = '₹ ' + tBilled.toLocaleString('en-IN'); document.getElementById('led-paid').textContent = '₹ ' + tPaid.toLocaleString('en-IN'); document.getElementById('led-due').textContent = '₹ ' + tDue.toLocaleString('en-IN'); document.getElementById('ledger-table-container').innerHTML = html;
 }
 
+// ----------------------------------------------------
+// NEW REPORTING LOGIC WITH PAID/PENDING FILTERS
+// ----------------------------------------------------
 function renderReports() {
-  var sDate = document.getElementById('rep-start').value; var eDate = document.getElementById('rep-end').value;
+  var sDate = document.getElementById('rep-start').value; 
+  var eDate = document.getElementById('rep-end').value;
+  var statFilter = document.getElementById('rep-status-filter').value;
+  
   var mTaxable = 0, mCGST = 0, mSGST = 0, mTotal = 0;
+  
   for(var i=0; i<bills.length; i++) {
     var b = bills[i];
+    var pass = true;
+    
     if(b.date) {
-      var pass = true; if (sDate && b.date < sDate) pass = false; if (eDate && b.date > eDate) pass = false;
-      if (pass) { mTaxable += (b.totalNoGST || 0); mCGST += (b.cgst || 0); mSGST += (b.sgst || 0); mTotal += (b.say || 0); }
+      if (sDate && b.date < sDate) pass = false; 
+      if (eDate && b.date > eDate) pass = false; 
+    } else { pass = false; }
+    
+    if (statFilter === 'paid' && b.status !== 'Paid') pass = false;
+    if (statFilter === 'pending' && b.status === 'Paid') pass = false;
+
+    if (pass) { 
+        mTaxable += (b.totalNoGST || 0); 
+        mCGST += (b.cgst || 0); 
+        mSGST += (b.sgst || 0); 
+        mTotal += (b.say || 0); 
     }
   }
+  
   if(document.getElementById('rep-taxable')) document.getElementById('rep-taxable').textContent = '₹ ' + mTaxable.toLocaleString('en-IN', {minimumFractionDigits: 2});
   if(document.getElementById('rep-cgst')) document.getElementById('rep-cgst').textContent = '₹ ' + mCGST.toLocaleString('en-IN', {minimumFractionDigits: 2});
   if(document.getElementById('rep-sgst')) document.getElementById('rep-sgst').textContent = '₹ ' + mSGST.toLocaleString('en-IN', {minimumFractionDigits: 2});
@@ -851,16 +873,39 @@ function renderReports() {
 }
 
 function exportReportToExcel() {
-  var sDate = document.getElementById('rep-start').value; var eDate = document.getElementById('rep-end').value;
-  var csv = 'Bill No.,Client,Site,Date,Taxable Amount,CGST,SGST,Total Invoice Value\n'; var count = 0;
+  var sDate = document.getElementById('rep-start').value; 
+  var eDate = document.getElementById('rep-end').value;
+  var statFilter = document.getElementById('rep-status-filter').value;
+  
+  // Added "Status" and "Payment Date" columns
+  var csv = 'Bill No.,Client,Site,Bill Date,Status,Payment Date,Taxable Amount,CGST,SGST,Total Invoice Value\n'; 
+  var count = 0;
+  
   for(var i=0; i<bills.length; i++) {
-    var b = bills[i]; var pass = true;
-    if(b.date) { if (sDate && b.date < sDate) pass = false; if (eDate && b.date > eDate) pass = false; } else { pass = false; }
-    if(pass) { count++; csv += '"' + (b.billNo || '').replace(/"/g, '""') + '","' + (b.toDept || '').replace(/"/g, '""') + '","' + (b.siteLoc || '').replace(/"/g, '""') + '",' + (b.date ? fmtD(b.date) : '-') + ',' + (b.totalNoGST ? b.totalNoGST.toFixed(2) : 0) + ',' + (b.cgst || 0).toFixed(2) + ',' + (b.sgst || 0).toFixed(2) + ',' + (b.say || 0) + '\n'; }
+    var b = bills[i]; 
+    var pass = true;
+    
+    if(b.date) { 
+        if (sDate && b.date < sDate) pass = false; 
+        if (eDate && b.date > eDate) pass = false; 
+    } else { pass = false; }
+    
+    if (statFilter === 'paid' && b.status !== 'Paid') pass = false;
+    if (statFilter === 'pending' && b.status === 'Paid') pass = false;
+    
+    if(pass) { 
+        count++; 
+        var pDate = b.lastPaymentDate ? fmtD(b.lastPaymentDate) : '-';
+        var stat = b.status || 'Pending';
+        
+        csv += '"' + (b.billNo || '').replace(/"/g, '""') + '","' + (b.toDept || '').replace(/"/g, '""') + '","' + (b.siteLoc || '').replace(/"/g, '""') + '",' + (b.date ? fmtD(b.date) : '-') + ',"' + stat + '","' + pDate + '",' + (b.totalNoGST ? b.totalNoGST.toFixed(2) : 0) + ',' + (b.cgst || 0).toFixed(2) + ',' + (b.sgst || 0).toFixed(2) + ',' + (b.say || 0) + '\n'; 
+    }
   }
-  if(count === 0) { alert('No bills found.'); return; }
+  
+  if(count === 0) { alert('No bills found matching these filters.'); return; }
   var link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); link.download = 'KARM_GST_Report.csv'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
+// ----------------------------------------------------
 
 function renderBills() {
   var q = (document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '');
@@ -927,7 +972,6 @@ function exportAllBillsToExcel() {
 function loadBill(id) { var b = bills.find(x => x.id === id); if(!b) return; editId = id; document.getElementById('gst').value = b.gst || ''; document.getElementById('pan').value = b.pan || ''; document.getElementById('billno').value = b.billNo || ''; document.getElementById('siteloc').value = b.siteLoc || ''; document.getElementById('billdate').value = b.date || ''; document.getElementById('todesig').value = b.toDesig || ''; document.getElementById('todept').value = b.toDept || ''; document.getElementById('toaddr').value = b.toAddr || ''; document.getElementById('workorder').value = b.workOrder || ''; document.getElementById('cgst-r').value = b.cgstRate || 9; document.getElementById('sgst-r').value = b.sgstRate || 9; document.getElementById('drive-link').value = b.driveLink || ''; items = []; document.getElementById('wi-con').innerHTML = ''; if(b.items && b.items.length > 0) { for(var j=0; j<b.items.length; j++) addItem(b.items[j]); } else { addItem(); } showTab('create', document.querySelectorAll('.tab')[1]); recalc(); }
 function deleteBill(id) { if (confirm('Delete?')) { bills = bills.filter(function(b){ return b.id !== id; }); localStorage.setItem('karm_bills', JSON.stringify(bills)); updateClientFilter(); renderBills(); } }
 
-// PRINTING LOGIC
 function openPrint(type, id) { 
   if (type === 'bill') {
     if(!localStorage.getItem('karm_lh')) { alert("Upload Letterhead in ⚙️ Settings first."); return; } 
