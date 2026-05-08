@@ -214,7 +214,8 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       <button class="tab" onclick="showTab('create',this)" title="Create a new bill">📝 New Bill</button>
       <button class="tab" onclick="showTab('records',this)" title="View all saved bills">📋 All Bills</button>
       <button class="tab" onclick="showTab('expenses',this)" title="Track business expenses">💸 Expenses</button>
-      <button class="tab" onclick="showTab('clients',this)" title="Manage client database">👥 Clients</button>
+      <button class="tab" onclick="showTab('staff',this)" title="Manage staff attendance and salary">👥 Staff & Salary</button>
+      <button class="tab" onclick="showTab('clients',this)" title="Manage client database">🤝 Clients</button>
       <button class="tab" onclick="showTab('reports',this)" title="View financial reports and ledgers">📊 Reports</button>
     </div>
   </div>
@@ -360,7 +361,53 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         </div>
         <div class="btnrow"><button class="btn r" onclick="saveExpense()" title="Save this expense to the database">💸 Save Expense</button></div>
       </div>
-      <div class="card"><div class="ct">Recent Expenses</div><div id="expenses-list"></div></div>
+      <div class="card"><div class="ct">Recent Expenses (Includes Salaries)</div><div id="expenses-list"></div></div>
+    </div>
+
+    <div id="tab-staff" class="sec">
+      
+      <div class="card" style="background:#F0F7FF;">
+        <div class="ct" style="color:#2980B9;">Add New Employee</div>
+        <div class="g3" style="margin-bottom:12px;">
+          <div class="f"><label style="color:#5C8EAD;">Employee Name</label><input type="text" id="stf-name" placeholder="e.g., Parvez Admin" style="border-color:#AEC6CF;" title="Enter staff name"></div>
+          <div class="f"><label style="color:#5C8EAD;">Designation / Role</label><input type="text" id="stf-role" placeholder="e.g., Site Supervisor" style="border-color:#AEC6CF;" title="Enter their role"></div>
+          <div class="f"><label style="color:#5C8EAD;">Default Daily Wage (₹)</label><input type="number" id="stf-wage" placeholder="e.g., 800" style="border-color:#AEC6CF;" title="Standard pay per full shift"></div>
+        </div>
+        <div class="btnrow"><button class="btn p" onclick="saveStaff()" title="Save new employee to database">👥 Save Employee</button></div>
+        <div class="st" id="stf-st"></div>
+      </div>
+
+      <div class="card" style="background:#FFF9E6; border-color:#FDEBD0;">
+        <div class="ct" style="color:#E67E22;">Log Daily Progress / Attendance</div>
+        <div class="g4" style="margin-bottom:12px;">
+          <div class="f">
+            <label style="color:#E67E22;">Select Staff</label>
+            <select id="att-staff" style="border-color:#FDEBD0;" title="Who worked today?"><option value="">-- Choose Employee --</option></select>
+          </div>
+          <div class="f"><label style="color:#E67E22;">Date</label><input type="date" id="att-date" style="border-color:#FDEBD0;" title="Date of shift"></div>
+          <div class="f"><label style="color:#E67E22;">Site / Location</label><input type="text" id="att-site" placeholder="e.g., Khavda Solar Plant" style="border-color:#FDEBD0;" title="Where did they work?"></div>
+          <div class="f">
+            <label style="color:#E67E22;">Shift Multiplier</label>
+            <select id="att-shift" style="border-color:#FDEBD0;" title="Full day, half day, or OT?">
+                <option value="1">Full Day (1.0x Wage)</option>
+                <option value="0.5">Half Day (0.5x Wage)</option>
+                <option value="1.5">Overtime (1.5x Wage)</option>
+                <option value="2">Double Shift (2.0x Wage)</option>
+            </select>
+          </div>
+        </div>
+        <div class="btnrow"><button class="btn" style="background:#F5CBA7; color:#E65100; border:none;" onclick="saveAttendance()" title="Log this shift to their ledger">📝 Log Shift</button></div>
+      </div>
+
+      <div class="card">
+        <div class="ct">Staff Salary Ledger (Live Balances)</div>
+        <div id="staff-ledger-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="ct">Recent Attendance Logs</div>
+        <div id="attendance-list"></div>
+      </div>
     </div>
 
     <div id="tab-clients" class="sec">
@@ -372,6 +419,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         </div>
         <div class="f" style="margin-bottom:12px;"><label style="color:#7DCEA0;">Standard Address</label><input type="text" id="cli-addr" placeholder="e.g., Mandvi - Kachchh" style="border-color:#A9DFBF;" title="Enter default address for this client"></div>
         <div class="btnrow"><button class="btn g" onclick="saveClient()" title="Save client to database">👥 Save Client</button></div>
+        <div class="st" id="cli-st"></div>
       </div>
       <div class="card"><div class="ct">Saved Clients</div><div id="clients-list"></div></div>
     </div>
@@ -480,18 +528,20 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 const OFFICE_USER = "admin@karm.in";
 const OFFICE_PASS = "KARM@2026";
 
-// HARDCODED FIREBASE URL (NO PLACEHOLDERS)
+// HARDCODED FIREBASE URL
 const FIREBASE_DB_URL = "https://karm-portal-default-rtdb.firebaseio.com/";
 
 // DATA ARRAYS
 var bills = []; var expenses = []; var clientDB = []; var items = []; var editId = null;
 let currentPaymentBillId = null;
+var staffDB = []; var attendanceDB = []; var staffPaymentsDB = []; // NEW STAFF ARRAYS
 
 var today = new Date();
 var firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
 var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
 document.getElementById('rep-start').value = firstDay;
 document.getElementById('rep-end').value = lastDay;
+document.getElementById('att-date').value = new Date().toISOString().split('T')[0]; // Default staff date
 
 // ==========================================
 // APPLY SAVED LOGO TO LOGIN SCREEN EARLY
@@ -532,7 +582,7 @@ function autoSyncToCloud(silent = false) {
     if (!url) return;
     if(!silent) showGlobalToast("☁️ Auto-Syncing to Cloud...", "inf");
 
-    var dataVault = { bills: bills, expenses: expenses, clients: clientDB, timestamp: new Date().toISOString() };
+    var dataVault = { bills: bills, expenses: expenses, clients: clientDB, staff: staffDB, attendance: attendanceDB, staffPayments: staffPaymentsDB, timestamp: new Date().toISOString() };
     
     fetch(url + "/karm_database.json", {
         method: 'PUT',
@@ -556,13 +606,21 @@ function autoSyncFromCloud() {
             var cloudBills = dataVault.bills || [];
             var cloudExp = dataVault.expenses || [];
             var cloudCli = dataVault.clients || [];
+            var cloudStaff = dataVault.staff || [];
+            var cloudAtt = dataVault.attendance || [];
+            var cloudSP = dataVault.staffPayments || [];
 
             // UPGRADED SMART SYNC SHIELD
-            if (cloudBills.length >= bills.length && cloudExp.length >= expenses.length && cloudCli.length >= clientDB.length) {
+            if (cloudBills.length >= bills.length && cloudExp.length >= expenses.length && cloudCli.length >= clientDB.length && cloudStaff.length >= staffDB.length && cloudAtt.length >= attendanceDB.length && cloudSP.length >= staffPaymentsDB.length) {
                 bills = cloudBills; localStorage.setItem('karm_bills', JSON.stringify(bills));
                 expenses = cloudExp; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
                 clientDB = cloudCli; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
+                staffDB = cloudStaff; localStorage.setItem('karm_staff', JSON.stringify(staffDB));
+                attendanceDB = cloudAtt; localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
+                staffPaymentsDB = cloudSP; localStorage.setItem('karm_staffPayments', JSON.stringify(staffPaymentsDB));
+                
                 renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown();
+                renderStaffList(); renderStaffDropdown(); renderAttendanceList(); renderStaffLedger();
                 showGlobalToast("✅ Cloud Data Synced!", "ok");
             } else {
                 showGlobalToast("⬆️ Local data is newer. Pushing to Cloud...", "inf");
@@ -570,7 +628,7 @@ function autoSyncFromCloud() {
             }
         } else {
             showGlobalToast("✅ Connected. Cloud is empty.", "ok");
-            if(bills.length > 0 || expenses.length > 0 || clientDB.length > 0) {
+            if(bills.length > 0 || expenses.length > 0 || clientDB.length > 0 || staffDB.length > 0) {
                 autoSyncToCloud(true);
             }
         }
@@ -593,7 +651,12 @@ function forceCloudRestore() {
             bills = dataVault.bills || []; localStorage.setItem('karm_bills', JSON.stringify(bills));
             expenses = dataVault.expenses || []; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
             clientDB = dataVault.clients || []; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
+            staffDB = dataVault.staff || []; localStorage.setItem('karm_staff', JSON.stringify(staffDB));
+            attendanceDB = dataVault.attendance || []; localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
+            staffPaymentsDB = dataVault.staffPayments || []; localStorage.setItem('karm_staffPayments', JSON.stringify(staffPaymentsDB));
+            
             renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown();
+            renderStaffList(); renderStaffDropdown(); renderAttendanceList(); renderStaffLedger();
             showGlobalToast("✅ Cloud Data Forced Restored!", "ok");
         }
     });
@@ -603,11 +666,11 @@ function forceCloudRestore() {
 // OFFLINE BACKUP & RESTORE (.json file)
 // ==========================================
 function downloadBackup() {
-    if(bills.length === 0 && expenses.length === 0 && clientDB.length === 0) {
+    if(bills.length === 0 && expenses.length === 0 && clientDB.length === 0 && staffDB.length === 0) {
         showGlobalToast("⚠️ Database is empty. Nothing to backup.", "err");
         return;
     }
-    var dataVault = { bills: bills, expenses: expenses, clients: clientDB, timestamp: new Date().toISOString() };
+    var dataVault = { bills: bills, expenses: expenses, clients: clientDB, staff: staffDB, attendance: attendanceDB, staffPayments: staffPaymentsDB, timestamp: new Date().toISOString() };
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataVault));
     var downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
@@ -625,10 +688,13 @@ function restoreBackup(event) {
     reader.onload = function(e) {
         try {
             var dataVault = JSON.parse(e.target.result);
-            if (dataVault.bills || dataVault.expenses || dataVault.clients) {
+            if (dataVault.bills || dataVault.expenses || dataVault.clients || dataVault.staff) {
                 bills = dataVault.bills || []; localStorage.setItem('karm_bills', JSON.stringify(bills));
                 expenses = dataVault.expenses || []; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
                 clientDB = dataVault.clients || []; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
+                staffDB = dataVault.staff || []; localStorage.setItem('karm_staff', JSON.stringify(staffDB));
+                attendanceDB = dataVault.attendance || []; localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
+                staffPaymentsDB = dataVault.staffPayments || []; localStorage.setItem('karm_staffPayments', JSON.stringify(staffPaymentsDB));
                 alert("✅ Local Database Restored Successfully! The page will now reload.");
                 location.reload();
             } else { alert("❌ Invalid backup file format."); }
@@ -672,6 +738,10 @@ function loadLocalData() {
     if (localStorage.getItem('karm_bills')) bills = JSON.parse(localStorage.getItem('karm_bills'));
     if (localStorage.getItem('karm_expenses')) expenses = JSON.parse(localStorage.getItem('karm_expenses'));
     if (localStorage.getItem('karm_clients')) clientDB = JSON.parse(localStorage.getItem('karm_clients'));
+    if (localStorage.getItem('karm_staff')) staffDB = JSON.parse(localStorage.getItem('karm_staff'));
+    if (localStorage.getItem('karm_attendance')) attendanceDB = JSON.parse(localStorage.getItem('karm_attendance'));
+    if (localStorage.getItem('karm_staffPayments')) staffPaymentsDB = JSON.parse(localStorage.getItem('karm_staffPayments'));
+    
     if (localStorage.getItem('karm_lh')) document.getElementById('lh-img-preview-bill').src = localStorage.getItem('karm_lh');
     if (localStorage.getItem('karm_logo')) {
       var imgEl = document.getElementById('app-logo-preview');
@@ -696,6 +766,7 @@ function loadLocalData() {
     }
   } catch(e) {}
   clearForm(); renderBills(); renderExpenses(); populateQuickClientSelect(); updateLedgerDropdown();
+  renderStaffList(); renderStaffDropdown(); renderAttendanceList(); renderStaffLedger();
 }
 
 function toggleSidebar() {
@@ -751,6 +822,7 @@ function showTab(t, el) {
   if(t === 'records' || t === 'reports') { updateClientFilter(); updateLedgerDropdown(); renderBills(); }
   if(t === 'expenses') { renderExpenses(); }
   if(t === 'clients') { renderClients(); }
+  if(t === 'staff') { renderStaffDropdown(); renderStaffLedger(); renderAttendanceList(); }
   if(t === 'create') { populateQuickClientSelect(); }
 }
 
@@ -772,6 +844,117 @@ function updateLedgerDropdown() {
   select.innerHTML = html;
   if(currentVal) generateLedger();
 }
+
+// ----------------------------------------------------
+// STAFF & SALARY MODULE
+// ----------------------------------------------------
+function saveStaff() {
+    var name = v('stf-name'); var role = v('stf-role'); var wage = parseFloat(v('stf-wage'));
+    if(!name || !role || !wage) { showSt('stf-st', 'Required fields missing.', 'err'); return; }
+    staffDB.push({ id: 'STF_'+Date.now(), name: name, role: role, wage: wage });
+    localStorage.setItem('karm_staff', JSON.stringify(staffDB));
+    document.getElementById('stf-name').value = ''; document.getElementById('stf-role').value = ''; document.getElementById('stf-wage').value = '';
+    showSt('stf-st', '✓ Employee Saved!', 'ok');
+    renderStaffDropdown(); renderStaffLedger(); autoSyncToCloud(true);
+}
+
+function deleteStaff(id) {
+    if(confirm("Delete Employee?")) {
+        staffDB = staffDB.filter(x => x.id !== id); localStorage.setItem('karm_staff', JSON.stringify(staffDB));
+        renderStaffDropdown(); renderStaffLedger(); autoSyncToCloud(true);
+    }
+}
+
+function renderStaffList() { /* Handled within Ledger */ }
+
+function renderStaffDropdown() {
+    var sel = document.getElementById('att-staff'); if(!sel) return;
+    var html = '<option value="">-- Choose Employee --</option>';
+    for(var i=0; i<staffDB.length; i++) { html += '<option value="'+staffDB[i].id+'">' + staffDB[i].name + ' (' + staffDB[i].role + ')</option>'; }
+    sel.innerHTML = html;
+}
+
+function saveAttendance() {
+    var sId = v('att-staff'); var dt = v('att-date'); var st = v('att-site'); var mult = parseFloat(v('att-shift'));
+    if(!sId || !dt || !st) { alert("Please fill all attendance fields."); return; }
+    var staff = staffDB.find(x => x.id === sId); if(!staff) return;
+    var earned = staff.wage * mult;
+    attendanceDB.unshift({ id: 'ATT_'+Date.now(), staffId: sId, staffName: staff.name, date: dt, site: st, mult: mult, amount: earned });
+    localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
+    document.getElementById('att-site').value = ''; // keep date and shift
+    showGlobalToast("✓ Shift Logged for " + staff.name + " (₹" + earned + ")", "ok");
+    renderAttendanceList(); renderStaffLedger(); autoSyncToCloud(true);
+}
+
+function deleteAttendance(id) {
+    if(confirm("Delete this shift log?")) {
+        attendanceDB = attendanceDB.filter(x => x.id !== id); localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
+        renderAttendanceList(); renderStaffLedger(); autoSyncToCloud(true);
+    }
+}
+
+function renderAttendanceList() {
+    var c = document.getElementById('attendance-list'); if(!c) return;
+    if(attendanceDB.length === 0) { c.innerHTML = '<div class="emp">No shifts logged yet.</div>'; return; }
+    var html = '<table class="btbl"><thead><tr><th>Date</th><th>Employee</th><th>Site</th><th>Shift</th><th>Earned</th><th>Action</th></tr></thead><tbody>';
+    for(var i=0; i<attendanceDB.length && i < 20; i++) { // show last 20
+        var a = attendanceDB[i]; 
+        var shiftTxt = a.mult === 1 ? 'Full' : (a.mult === 0.5 ? 'Half' : a.mult + 'x');
+        html += '<tr><td>' + fmtD(a.date) + '</td><td style="font-weight:bold; color:#5C8EAD;">' + a.staffName + '</td><td>' + a.site + '</td><td>' + shiftTxt + '</td><td style="color:#27AE60; font-weight:bold;">₹ ' + a.amount.toLocaleString('en-IN') + '</td><td><button class="btn r" style="padding:4px 10px;font-size:11px;border:none;" onclick="deleteAttendance(\'' + a.id + '\')" title="Delete this shift">🗑</button></td></tr>'; 
+    }
+    c.innerHTML = html + '</tbody></table>';
+}
+
+function calcStaffBalances() {
+    var bals = {};
+    for(var i=0; i<staffDB.length; i++) { bals[staffDB[i].id] = { earned: 0, paid: 0 }; }
+    for(var a=0; a<attendanceDB.length; a++) { 
+        var att = attendanceDB[a]; 
+        if(bals[att.staffId]) bals[att.staffId].earned += att.amount; 
+    }
+    for(var p=0; p<staffPaymentsDB.length; p++) {
+        var pay = staffPaymentsDB[p];
+        if(bals[pay.staffId]) bals[pay.staffId].paid += pay.amount;
+    }
+    return bals;
+}
+
+function renderStaffLedger() {
+    var c = document.getElementById('staff-ledger-list'); if(!c) return;
+    if(staffDB.length === 0) { c.innerHTML = '<div class="emp">No employees added.</div>'; return; }
+    var bals = calcStaffBalances();
+    var html = '<table class="btbl"><thead><tr><th>Name</th><th>Role (Wage)</th><th>Total Earned</th><th>Total Paid</th><th>Balance Due</th><th>Action</th></tr></thead><tbody>';
+    for(var i=0; i<staffDB.length; i++) { 
+        var s = staffDB[i]; var bal = bals[s.id]; var due = bal.earned - bal.paid;
+        var dueStyle = due > 0 ? 'color:#C0392B; font-weight:bold;' : 'color:#27AE60; font-weight:bold;';
+        html += '<tr><td style="font-weight:bold; color:#5C8EAD;">' + s.name + '</td><td>' + s.role + ' (₹' + s.wage + ')</td><td style="color:#5C6B73;">₹ ' + bal.earned.toLocaleString('en-IN') + '</td><td style="color:#5C6B73;">₹ ' + bal.paid.toLocaleString('en-IN') + '</td><td style="' + dueStyle + '">₹ ' + due.toLocaleString('en-IN') + '</td><td style="display:flex;gap:5px;"><button class="btn g" style="padding:4px 10px;font-size:11px;border:none;" onclick="paySalary(\'' + s.id + '\', \'' + s.name + '\', ' + due + ')" title="Pay Salary & Log Expense">💸 Pay</button><button class="btn" style="padding:4px 10px;font-size:11px;background:#FDECEA;color:#C62828;border:none;" onclick="deleteStaff(\'' + s.id + '\')" title="Delete Employee">✕</button></td></tr>'; 
+    }
+    c.innerHTML = html + '</tbody></table>';
+}
+
+function paySalary(staffId, staffName, currentDue) {
+    var amt = prompt("How much are you paying " + staffName + "?\nCurrent Balance Due: ₹" + currentDue);
+    if(!amt || isNaN(amt) || amt <= 0) return;
+    
+    var payAmt = parseFloat(amt);
+    var pDate = new Date().toISOString().split('T')[0];
+    
+    // Log in Staff Payments
+    staffPaymentsDB.unshift({ id: 'SP_'+Date.now(), staffId: staffId, date: pDate, amount: payAmt });
+    localStorage.setItem('karm_staffPayments', JSON.stringify(staffPaymentsDB));
+    
+    // Automatically Log in Global Expenses
+    var expData = { type: 'expense', id: 'EXP_' + Date.now().toString(), date: pDate, desc: 'Salary Paid: ' + staffName, amount: payAmt };
+    expenses.unshift(expData); localStorage.setItem('karm_expenses', JSON.stringify(expenses));
+    
+    renderStaffLedger(); renderExpenses(); renderBills(); autoSyncToCloud(true);
+    showGlobalToast("✅ Salary Paid & Expense Logged!", "ok");
+}
+function showSt2(id, msg, type) { var el = document.getElementById(id); if(!el) return; el.textContent = msg; el.className = 'st ' + type; el.style.display = 'block'; setTimeout(function(){ el.className = 'st'; el.style.display = 'none'; }, 3000); }
+// Use existing showSt logic but adapt for new div
+function showSt(id, msg, type) { if(id==='st') { var el = document.getElementById('st'); el.textContent = msg; el.className = 'st ' + type; setTimeout(function(){ el.className = 'st'; }, 3000); } else { showSt2(id, msg, type); } }
+
+// ----------------------------------------------------
 
 function saveClient() {
   var dept = v('cli-dept'); var desig = v('cli-desig'); var addr = v('cli-addr');
@@ -840,9 +1023,9 @@ function store(d) {
 }
 
 function saveBill() {
-  var d = getData(); if(!d.billNo) { showSt('Enter Bill No.', 'err'); return; }
+  var d = getData(); if(!d.billNo) { showSt('st', 'Enter Bill No.', 'err'); return; }
   store(d); editId = d.id; updateClientFilter(); updateLedgerDropdown(); 
-  showSt('✓ Bill Saved Locally!', 'ok');
+  showSt('st', '✓ Bill Saved Locally!', 'ok');
   renderBills();
   autoSyncToCloud(false);
 }
@@ -993,14 +1176,12 @@ function renderBills() {
   
   for(var j=0; j<f.length; j++) {
     var b = f[j]; 
-    
     var finalAmtStr = b.say ? b.say.toLocaleString('en-IN') : '-';
     var baseAmtStr = b.totalNoGST ? b.totalNoGST.toLocaleString('en-IN', {minimumFractionDigits: 2}) : '-';
     var gstPct = (b.cgstRate !== undefined && b.sgstRate !== undefined) ? (b.cgstRate + b.sgstRate) : 18;
     var gstAmtStr = (b.cgst !== undefined && b.sgst !== undefined) ? (b.cgst + b.sgst).toLocaleString('en-IN', {minimumFractionDigits: 2}) : '-';
 
     var daysOld = Math.floor((today - new Date(b.date)) / (1000 * 60 * 60 * 24));
-    
     var pDateStr = b.lastPaymentDate ? '<span style="font-size:11.5px; color:#5C6B73; margin-top:4px; font-weight:600; display:block;">Paid: ' + fmtD(b.lastPaymentDate) + '</span>' : '';
     
     var statusBtn = '';
@@ -1084,7 +1265,6 @@ function buildPrintLedger(clientName) {
 
 function inr(n) { return Number(n||0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
 function fmtD(d) { if(!d) return ''; var p = d.split('-'); if(p.length !== 3) return d; return p[2] + '/' + p[1] + '/' + p[0]; }
-function showSt(msg, type) { var el = document.getElementById('st'); if(!el) return; el.textContent = msg; el.className = 'st ' + type; setTimeout(function(){ el.className = 'st'; }, 3000); }
 function clearForm() { document.getElementById('gst').value = '24AAFPZ2927G2ZI'; document.getElementById('pan').value = 'AAFPZ2927G'; var ids = ['billno','siteloc','todesig','todept','toaddr','workorder','quick-client', 'drive-link']; for(var i=0; i<ids.length; i++) { var el = document.getElementById(ids[i]); if(el) el.value = ''; } document.getElementById('billdate').value = new Date().toISOString().split('T')[0]; document.getElementById('exp-date').value = new Date().toISOString().split('T')[0]; document.getElementById('cgst-r').value = '9'; document.getElementById('sgst-r').value = '9'; items = []; editId = null; document.getElementById('wi-con').innerHTML = ''; document.getElementById('totals').innerHTML = ''; document.getElementById('words').textContent = ''; document.getElementById('st').className = 'st'; addItem(); }
 function n2w(n) { if(n === 0) return 'Zero'; var o = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen']; var t = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety']; function h(x) { if(x < 20) return o[x]; if(x < 100) return t[Math.floor(x/10)] + (x%10 ? ' ' + o[x%10] : ''); if(x < 1000) return o[Math.floor(x/100)] + ' Hundred' + (x%100 ? ' ' + h(x%100) : ''); if(x < 100000) return h(Math.floor(x/1000)) + ' Thousand' + (x%1000 ? ' ' + h(x%1000) : ''); if(x < 10000000) return h(Math.floor(x/100000)) + ' Lakh' + (x%100000 ? ' ' + h(x%100000) : ''); return h(Math.floor(x/10000000)) + ' Crore' + (x%10000000 ? ' ' + h(x%10000000) : ''); } return h(n); }
 </script>
