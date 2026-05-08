@@ -173,13 +173,11 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
   <div class="login-box">
       <img id="login-logo-preview" src="" alt="Firm Logo" style="max-height: 60px; max-width: 150px; margin: 0 auto 15px auto; display: none; border-radius: 6px;">
       <div class="hdr-logo" id="login-logo-fallback" style="margin: 0 auto 15px auto;">K</div>
-      
       <h2>KARM Consultancy Services</h2>
       <p>Authorized Office Access Only</p>
-      
-      <input type="text" id="user-email" placeholder="Username">
-      <input type="password" id="user-pass" placeholder="Password">
-      <button onclick="checkLogin()">Secure Login</button>
+      <input type="text" id="user-email" placeholder="Username" title="Enter your office email">
+      <input type="password" id="user-pass" placeholder="Password" title="Enter your secure password">
+      <button onclick="checkLogin()" title="Click to log in to the portal">Secure Login</button>
       <p id="login-err" style="color: #ECA29B; font-size: 13px; margin-top: 15px; display: none; font-weight:bold;">Incorrect Username or Password</p>
   </div>
 </div>
@@ -192,12 +190,12 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       <div id="pay-bill-info" class="modal-info"></div>
       <div class="f" style="margin-bottom:20px;">
         <label>Date Received</label>
-        <input type="date" id="pay-date">
+        <input type="date" id="pay-date" title="Select the date payment was received">
       </div>
       <div class="btnrow" style="margin-top:0; justify-content:center; gap:10px;">
-        <button class="btn" style="background:#F0F4F8; color:#7B8A9C; border:none;" onclick="closePaymentModal()">Cancel</button>
-        <button class="btn r" id="btn-unmark-paid" style="display:none; padding:8px 12px; font-size:12px;" onclick="unmarkPayment()">Undo (Unpaid)</button>
-        <button class="btn g" onclick="confirmPayment()">Mark as Fully Paid</button>
+        <button class="btn" style="background:#F0F4F8; color:#7B8A9C; border:none;" onclick="closePaymentModal()" title="Cancel and close window">Cancel</button>
+        <button class="btn r" id="btn-unmark-paid" style="display:none; padding:8px 12px; font-size:12px;" onclick="unmarkPayment()" title="Change status back to Pending">Undo (Unpaid)</button>
+        <button class="btn g" onclick="confirmPayment()" title="Mark this bill as Paid">Mark as Fully Paid</button>
       </div>
     </div>
   </div>
@@ -206,15 +204,15 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
   <div class="sidebar" id="sidebar">
     <div class="sidebar-hdr">
       <h2>Menu</h2>
-      <button class="close-btn" onclick="toggleSidebar()">✕</button>
+      <button class="close-btn" onclick="toggleSidebar()" title="Close Menu">✕</button>
     </div>
     <div class="tabs-col">
-      <button class="tab active" onclick="showTab('dashboard',this)">🏠 Home</button>
-      <button class="tab" onclick="showTab('create',this)">📝 New Bill</button>
-      <button class="tab" onclick="showTab('records',this)">📋 All Bills</button>
-      <button class="tab" onclick="showTab('expenses',this)">💸 Expenses</button>
-      <button class="tab" onclick="showTab('clients',this)">👥 Clients</button>
-      <button class="tab" onclick="showTab('reports',this)">📊 Reports</button>
+      <button class="tab active" onclick="showTab('dashboard',this)" title="Go to Dashboard">🏠 Home</button>
+      <button class="tab" onclick="showTab('create',this)" title="Create a new bill">📝 New Bill</button>
+      <button class="tab" onclick="showTab('records',this)" title="View all saved bills">📋 All Bills</button>
+      <button class="tab" onclick="showTab('expenses',this)" title="Track business expenses">💸 Expenses</button>
+      <button class="tab" onclick="showTab('clients',this)" title="Manage client database">👥 Clients</button>
+      <button class="tab" onclick="showTab('reports',this)" title="View financial reports and ledgers">📊 Reports</button>
     </div>
   </div>
 
@@ -229,7 +227,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       </div>
       
       <div class="hdr-actions">
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <button class="logout-btn" onclick="logout()" title="Securely log out of the portal">Logout</button>
         <div class="settings-gear" onclick="toggleSetup()" title="Upload Images & Backup Settings">⚙️</div>
       </div>
     </div>
@@ -237,7 +235,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
     <div id="setup-card" class="card" style="background:#F0F4F8; display: none;">
       <div class="ct" style="color:#5C8EAD; display:flex; justify-content:space-between;">
         <span>⚙️ Local Vault & Media Settings</span>
-        <button onclick="toggleSetup()" style="background:none; border:none; color:#ECA29B; font-weight:bold; cursor:pointer;">✕ Close</button>
+        <button onclick="toggleSetup()" style="background:none; border:none; color:#ECA29B; font-weight:bold; cursor:pointer;" title="Close Settings">✕ Close</button>
       </div>
 
       <div style="background:#FFF; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #EAEef4;">
@@ -246,18 +244,18 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         
         <input type="file" id="backup-file" style="display:none;" accept=".json" onchange="restoreBackup(event)">
         <div class="btnrow" style="margin-top:0;">
-            <button class="btn p" onclick="forceCloudBackup()">☁️ Force Upload to Cloud</button>
-            <button class="btn g" onclick="forceCloudRestore()">📥 Force Download from Cloud</button>
-            <button class="btn" style="background:#EAEef4; color:#5C6B73; border:none;" onclick="downloadBackup()">💽 Download Local .json Backup</button>
-            <button class="btn" style="background:#EAEef4; color:#5C6B73; border:none;" onclick="document.getElementById('backup-file').click()">📂 Restore from .json</button>
+            <button class="btn p" onclick="forceCloudBackup()" title="Force push local data to the cloud">☁️ Force Upload to Cloud</button>
+            <button class="btn g" onclick="forceCloudRestore()" title="Force pull data from the cloud">📥 Force Download from Cloud</button>
+            <button class="btn" style="background:#EAEef4; color:#5C6B73; border:none;" onclick="downloadBackup()" title="Save an offline backup file to your computer">💽 Download Local .json Backup</button>
+            <button class="btn" style="background:#EAEef4; color:#5C6B73; border:none;" onclick="document.getElementById('backup-file').click()" title="Restore data from an offline backup file">📂 Restore from .json</button>
         </div>
       </div>
 
       <div class="g4">
-        <div class="f"><label>1. Firm Logo</label><input type="file" accept="image/*" onchange="uploadLogo(this)"></div>
-        <div class="f"><label>2. A4 Letterhead (PDF)</label><input type="file" accept="image/*" onchange="uploadLetterhead(this)"></div>
-        <div class="f"><label>3. Mobile Welcome Image</label><input type="file" accept="image/*" onchange="uploadDashImage(this)"></div>
-        <div class="f"><label>4. Hero Video URL (.mp4)</label><input type="text" id="video-url-input" placeholder="Paste an MP4 link here" onchange="saveVideoUrl(this.value)"></div>
+        <div class="f"><label>1. Firm Logo</label><input type="file" accept="image/*" onchange="uploadLogo(this)" title="Upload your company logo"></div>
+        <div class="f"><label>2. A4 Letterhead (PDF)</label><input type="file" accept="image/*" onchange="uploadLetterhead(this)" title="Upload a blank A4 letterhead image"></div>
+        <div class="f"><label>3. Mobile Welcome Image</label><input type="file" accept="image/*" onchange="uploadDashImage(this)" title="Upload an image for the home dashboard"></div>
+        <div class="f"><label>4. Hero Video URL (.mp4)</label><input type="text" id="video-url-input" placeholder="Paste an MP4 link here" onchange="saveVideoUrl(this.value)" title="Paste a direct URL to an MP4 video"></div>
       </div>
     </div>
 
@@ -276,42 +274,42 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       <div class="card" style="background:#F4F9F5;">
         <div class="f">
           <label style="color:#2D5A27;">👥 Quick Fill from Client Database</label>
-          <select id="quick-client" onchange="autoFillClient()" style="border-color:#A9DFBF;"><option value="">-- Type manually or select a saved client --</option></select>
+          <select id="quick-client" onchange="autoFillClient()" style="border-color:#A9DFBF;" title="Select a saved client to auto-fill details"><option value="">-- Type manually or select a saved client --</option></select>
         </div>
       </div>
 
       <div class="card">
         <div class="ct">Company Info</div>
         <div class="g2" style="margin-bottom:12px;">
-          <div class="f"><label>GST Registration Number</label><input id="gst" value="24AAFPZ2927G2ZI" readonly></div>
-          <div class="f"><label>PAN No.</label><input id="pan" value="AAFPZ2927G" readonly></div>
+          <div class="f"><label>GST Registration Number</label><input id="gst" value="24AAFPZ2927G2ZI" readonly title="Your fixed GST Number"></div>
+          <div class="f"><label>PAN No.</label><input id="pan" value="AAFPZ2927G" readonly title="Your fixed PAN Number"></div>
         </div>
         <div class="g3">
-          <div class="f"><label>Bill No.</label><input id="billno" placeholder="116/MNP/TPI/LEGACY WASTE/26"></div>
-          <div class="f"><label>Site Location</label><input id="siteloc" placeholder="Mandvi - Kachchh"></div>
-          <div class="f"><label>Date</label><input id="billdate" type="date"></div>
+          <div class="f"><label>Bill No.</label><input id="billno" placeholder="116/MNP/TPI/LEGACY WASTE/26" title="Enter unique bill number"></div>
+          <div class="f"><label>Site Location</label><input id="siteloc" placeholder="Mandvi - Kachchh" title="Enter site location"></div>
+          <div class="f"><label>Date</label><input id="billdate" type="date" title="Select bill date"></div>
         </div>
       </div>
 
       <div class="card">
         <div class="ct">Bill To</div>
         <div class="g2" style="margin-bottom:12px;">
-          <div class="f"><label>Designation</label><input id="todesig" placeholder="The Chief Officer"></div>
-          <div class="f"><label>Department / Organisation</label><input id="todept" placeholder="Mandvi Nagarpalika"></div>
+          <div class="f"><label>Designation</label><input id="todesig" placeholder="The Chief Officer" title="Enter client designation"></div>
+          <div class="f"><label>Department / Organisation</label><input id="todept" placeholder="Mandvi Nagarpalika" title="Enter client department name"></div>
         </div>
         <div class="g2">
-          <div class="f"><label>Address</label><input id="toaddr" placeholder="Mandvi - Kachchh"></div>
-          <div class="f"><label>Work Order Reference</label><input id="workorder" placeholder="MNP/WORK ORDER/1647/24-25 DT - 11/03/2025"></div>
+          <div class="f"><label>Address</label><input id="toaddr" placeholder="Mandvi - Kachchh" title="Enter client address"></div>
+          <div class="f"><label>Work Order Reference</label><input id="workorder" placeholder="MNP/WORK ORDER/1647/24-25 DT - 11/03/2025" title="Enter work order reference"></div>
         </div>
       </div>
 
-      <div class="card"><div class="ct">Work Items</div><div id="wi-con"></div><button class="addbtn" onclick="addItem()">＋ Add Work Item</button></div>
+      <div class="card"><div class="ct">Work Items</div><div id="wi-con"></div><button class="addbtn" onclick="addItem()" title="Add a new work item row">＋ Add Work Item</button></div>
 
       <div class="card">
         <div class="ct">GST &amp; Totals</div>
         <div class="g2" style="margin-bottom:1rem;">
-          <div class="f"><label>CGST Rate (%)</label><input id="cgst-r" type="number" value="9" step="0.01" oninput="recalc()"></div>
-          <div class="f"><label>SGST Rate (%)</label><input id="sgst-r" type="number" value="9" step="0.01" oninput="recalc()"></div>
+          <div class="f"><label>CGST Rate (%)</label><input id="cgst-r" type="number" value="9" step="0.01" oninput="recalc()" title="Edit CGST Percentage"></div>
+          <div class="f"><label>SGST Rate (%)</label><input id="sgst-r" type="number" value="9" step="0.01" oninput="recalc()" title="Edit SGST Percentage"></div>
         </div>
         <div id="totals"></div>
         <div style="font-style:italic;color:#7B8A9C;font-size:12px;margin-top:8px;" id="words"></div>
@@ -319,13 +317,13 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 
       <div class="card" style="background:#F0F7FF;">
         <div class="ct" style="color:#4A90E2;">Cloud Attachments</div>
-        <div class="f"><label style="color:#5C8EAD;">📁 Google Drive Link (For Signed PDF, Photos, or MB)</label><input type="url" id="drive-link" placeholder="https://drive.google.com/file/d/..." style="border-color:#AEC6CF;"></div>
+        <div class="f"><label style="color:#5C8EAD;">📁 Google Drive Link (For Signed PDF, Photos, or MB)</label><input type="url" id="drive-link" placeholder="https://drive.google.com/file/d/..." style="border-color:#AEC6CF;" title="Paste a Google Drive link for attachments"></div>
       </div>
 
       <div class="btnrow">
-        <button class="btn p" onclick="saveBill()">💾 Save & Auto-Sync</button>
-        <button class="btn" style="background:#F5CBA7; color:#E65100; border:none;" onclick="openPrint('bill')">🖨 Preview PDF</button>
-        <button class="btn" style="border:none; background:#F0F4F8; color:#7B8A9C;" onclick="clearForm()">↺ Clear</button>
+        <button class="btn p" onclick="saveBill()" title="Save this bill to the database">💾 Save & Auto-Sync</button>
+        <button class="btn" style="background:#F5CBA7; color:#E65100; border:none;" onclick="openPrint('bill')" title="Preview and Print this bill">🖨 Preview PDF</button>
+        <button class="btn" style="border:none; background:#F0F4F8; color:#7B8A9C;" onclick="clearForm()" title="Clear all fields and start fresh">↺ Clear</button>
       </div>
       <div class="st" id="st"></div>
     </div>
@@ -335,14 +333,14 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px;">
           <div class="ct" style="margin:0;">Saved Bills (Click Status to Update)</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-            <input type="date" id="date-filter" style="width:130px;" onchange="renderBills()" title="Filter by Date">
-            <select id="client-filter" style="width:170px; text-overflow:ellipsis;" onchange="renderBills()"><option value="">All Clients</option></select>
-            <input placeholder="Search..." id="search-input" style="width:150px;" oninput="renderBills()">
+            <input type="date" id="date-filter" style="width:130px;" onchange="renderBills()" title="Filter records by date">
+            <select id="client-filter" style="width:170px; text-overflow:ellipsis;" onchange="renderBills()" title="Filter records by client"><option value="">All Clients</option></select>
+            <input placeholder="Search..." id="search-input" style="width:150px;" oninput="renderBills()" title="Search by bill number or client name">
           </div>
         </div>
         <div id="bills-list"></div>
         <div style="display:flex; justify-content:flex-end; margin-top:15px;">
-          <button class="btn" style="background:#E8F0FE; color:#4A90E2; border:none;" onclick="exportAllBillsToExcel()">📊 Export to Excel</button>
+          <button class="btn" style="background:#E8F0FE; color:#4A90E2; border:none;" onclick="exportAllBillsToExcel()" title="Download an Excel sheet of all bills">📊 Export to Excel</button>
         </div>
       </div>
     </div>
@@ -351,11 +349,11 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       <div class="card" style="background:#FFF0F0;">
         <div class="ct" style="color:#C0392B;">Add Business Expense</div>
         <div class="g3">
-          <div class="f"><label style="color:#ECA29B;">Date</label><input type="date" id="exp-date" style="border-color:#F5B7B1;"></div>
-          <div class="f"><label style="color:#ECA29B;">Description / Vendor</label><input type="text" id="exp-desc" placeholder="e.g., Supplies..." style="border-color:#F5B7B1;"></div>
-          <div class="f"><label style="color:#ECA29B;">Amount (₹)</label><input type="number" id="exp-amt" placeholder="0.00" style="border-color:#F5B7B1;"></div>
+          <div class="f"><label style="color:#ECA29B;">Date</label><input type="date" id="exp-date" style="border-color:#F5B7B1;" title="Expense date"></div>
+          <div class="f"><label style="color:#ECA29B;">Description / Vendor</label><input type="text" id="exp-desc" placeholder="e.g., Supplies..." style="border-color:#F5B7B1;" title="What was this expense for?"></div>
+          <div class="f"><label style="color:#ECA29B;">Amount (₹)</label><input type="number" id="exp-amt" placeholder="0.00" style="border-color:#F5B7B1;" title="Total amount spent"></div>
         </div>
-        <div class="btnrow"><button class="btn r" onclick="saveExpense()">💸 Save Expense</button></div>
+        <div class="btnrow"><button class="btn r" onclick="saveExpense()" title="Save this expense to the database">💸 Save Expense</button></div>
       </div>
       <div class="card"><div class="ct">Recent Expenses</div><div id="expenses-list"></div></div>
     </div>
@@ -364,11 +362,11 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       <div class="card" style="background:#F4F9F5;">
         <div class="ct" style="color:#2D5A27;">Add New Client</div>
         <div class="g2" style="margin-bottom:12px;">
-          <div class="f"><label style="color:#7DCEA0;">Department / Organisation Name</label><input type="text" id="cli-dept" placeholder="e.g., Mandvi Nagarpalika" style="border-color:#A9DFBF;"></div>
-          <div class="f"><label style="color:#7DCEA0;">Primary Designation</label><input type="text" id="cli-desig" placeholder="e.g., The Chief Officer" style="border-color:#A9DFBF;"></div>
+          <div class="f"><label style="color:#7DCEA0;">Department / Organisation Name</label><input type="text" id="cli-dept" placeholder="e.g., Mandvi Nagarpalika" style="border-color:#A9DFBF;" title="Enter department name"></div>
+          <div class="f"><label style="color:#7DCEA0;">Primary Designation</label><input type="text" id="cli-desig" placeholder="e.g., The Chief Officer" style="border-color:#A9DFBF;" title="Enter primary contact designation"></div>
         </div>
-        <div class="f" style="margin-bottom:12px;"><label style="color:#7DCEA0;">Standard Address</label><input type="text" id="cli-addr" placeholder="e.g., Mandvi - Kachchh" style="border-color:#A9DFBF;"></div>
-        <div class="btnrow"><button class="btn g" onclick="saveClient()">👥 Save Client</button></div>
+        <div class="f" style="margin-bottom:12px;"><label style="color:#7DCEA0;">Standard Address</label><input type="text" id="cli-addr" placeholder="e.g., Mandvi - Kachchh" style="border-color:#A9DFBF;" title="Enter default address for this client"></div>
+        <div class="btnrow"><button class="btn g" onclick="saveClient()" title="Save client to database">👥 Save Client</button></div>
       </div>
       <div class="card"><div class="ct">Saved Clients</div><div id="clients-list"></div></div>
     </div>
@@ -376,21 +374,21 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
     <div id="tab-reports" class="sec">
       <div class="ct" style="margin-bottom: 15px;">Global Financial Overview</div>
       <div class="g5" style="margin-bottom:1.5rem;">
-        <div class="dash-card" style="background:#F0F4FF;"><div class="dc-title" style="color:#5C8EAD;">TOTAL BILLS</div><div class="dc-val" id="dash-global-count" style="color:#4A90E2;">0</div></div>
-        <div class="dash-card" style="background:#FFF9E6;"><div class="dc-title" style="color:#E67E22;">OUTSTANDING</div><div class="dc-val" id="dash-global-pending" style="color:#E65100;">₹ 0</div></div>
-        <div class="dash-card" style="background:#ECF9F0;"><div class="dc-title" style="color:#27AE60;">TOTAL RECEIVED</div><div class="dc-val" id="dash-global-paid" style="color:#2E7D32;">₹ 0</div></div>
-        <div class="dash-card" style="background:#FFF0F0;"><div class="dc-title" style="color:#E74C3C;">TOTAL EXPENSES</div><div class="dc-val" id="dash-global-expenses" style="color:#C0392B;">₹ 0</div></div>
-        <div class="dash-card" style="background:#F0F7FF;"><div class="dc-title" style="color:#2980B9;">NET PROFIT</div><div class="dc-val" id="dash-global-profit" style="color:#0277BD;">₹ 0</div></div>
+        <div class="dash-card" style="background:#F0F4FF;"><div class="dc-title" style="color:#5C8EAD;" title="Total number of bills created">TOTAL BILLS</div><div class="dc-val" id="dash-global-count" style="color:#4A90E2;">0</div></div>
+        <div class="dash-card" style="background:#FFF9E6;"><div class="dc-title" style="color:#E67E22;" title="Total amount unpaid by clients">OUTSTANDING</div><div class="dc-val" id="dash-global-pending" style="color:#E65100;">₹ 0</div></div>
+        <div class="dash-card" style="background:#ECF9F0;"><div class="dc-title" style="color:#27AE60;" title="Total amount received from clients">TOTAL RECEIVED</div><div class="dc-val" id="dash-global-paid" style="color:#2E7D32;">₹ 0</div></div>
+        <div class="dash-card" style="background:#FFF0F0;"><div class="dc-title" style="color:#E74C3C;" title="Total business expenses logged">TOTAL EXPENSES</div><div class="dc-val" id="dash-global-expenses" style="color:#C0392B;">₹ 0</div></div>
+        <div class="dash-card" style="background:#F0F7FF;"><div class="dc-title" style="color:#2980B9;" title="Total Received minus Total Expenses">NET PROFIT</div><div class="dc-val" id="dash-global-profit" style="color:#0277BD;">₹ 0</div></div>
       </div>
 
       <div class="card" style="background:#F4F9F5; border-color:#D5F5E3; margin-bottom:1.5rem;">
         <div class="ct" style="color:#27AE60; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
           <span>📋 Client Account Statement (Ledger)</span>
-          <button class="btn g" onclick="openPrint('ledger')" style="padding:6px 12px; font-size:12px; display:none;" id="btn-print-ledger">🖨 Print Statement</button>
+          <button class="btn g" onclick="openPrint('ledger')" style="padding:6px 12px; font-size:12px; display:none;" id="btn-print-ledger" title="Print this client's ledger statement">🖨 Print Statement</button>
         </div>
         <div class="f" style="margin-bottom:15px; max-width: 350px;">
           <label style="color:#27AE60;">Select Client to Generate Statement</label>
-          <select id="ledger-client-select" onchange="generateLedger()" style="border-color:#A9DFBF;"><option value="">-- Choose a Client --</option></select>
+          <select id="ledger-client-select" onchange="generateLedger()" style="border-color:#A9DFBF;" title="Choose a client to view their ledger"><option value="">-- Choose a Client --</option></select>
         </div>
         <div id="ledger-results" style="display:none;">
           <div class="g3" style="margin-bottom:15px;">
@@ -406,10 +404,10 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         <div class="ct" style="color:#E67E22; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
           <span>📊 Custom Period GST Summary</span>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <span style="font-size:12px; color:#A0B2C6;">From:</span><input type="date" id="rep-start" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
-            <span style="font-size:12px; color:#A0B2C6;">To:</span><input type="date" id="rep-end" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
-            <select id="rep-status-filter" style="border-color:#FDEBD0; background:#fff; padding:6px 10px; font-size:12px; border-radius:6px;" onchange="renderReports()"><option value="all">All Bills</option><option value="paid">Only Received (Paid)</option><option value="pending">Only Pending</option></select>
-            <button class="btn" style="background:#FFF3E0; color:#E67E22; border:none; padding:6px 12px; font-size:12px;" onclick="exportReportToExcel()">📊 Download Excel</button>
+            <span style="font-size:12px; color:#A0B2C6;">From:</span><input type="date" id="rep-start" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;" title="Start date for report">
+            <span style="font-size:12px; color:#A0B2C6;">To:</span><input type="date" id="rep-end" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;" title="End date for report">
+            <select id="rep-status-filter" style="border-color:#FDEBD0; background:#fff; padding:6px 10px; font-size:12px; border-radius:6px;" onchange="renderReports()" title="Filter by payment status"><option value="all">All Bills</option><option value="paid">Only Received (Paid)</option><option value="pending">Only Pending</option></select>
+            <button class="btn" style="background:#FFF3E0; color:#E67E22; border:none; padding:6px 12px; font-size:12px;" onclick="exportReportToExcel()" title="Download GST Summary to Excel">📊 Download Excel</button>
           </div>
         </div>
         <div class="g4">
@@ -477,7 +475,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 const OFFICE_USER = "admin@karm.in";
 const OFFICE_PASS = "KARM@2026";
 
-// YOUR CLOUD DATABASE URL
+// HARDCODED FIREBASE URL (NO PLACEHOLDERS)
 const FIREBASE_DB_URL = "https://karm-portal-default-rtdb.firebaseio.com/";
 
 // DATA ARRAYS
@@ -517,7 +515,7 @@ function showGlobalToast(msg, type) {
 }
 
 // ==========================================
-// FIREBASE AUTO-SYNC LOGIC
+// SMART FIREBASE AUTO-SYNC LOGIC
 // ==========================================
 function getCleanDbUrl() {
     if (!FIREBASE_DB_URL || FIREBASE_DB_URL.includes("PASTE_YOUR")) return null;
@@ -544,19 +542,34 @@ function autoSyncToCloud(silent = false) {
 function autoSyncFromCloud() {
     var url = getCleanDbUrl();
     if (!url) return;
-    showGlobalToast("🔄 Fetching latest data from Cloud...", "inf");
+    showGlobalToast("🔄 Checking Cloud Data...", "inf");
 
     fetch(url + "/karm_database.json")
     .then(res => res.json())
     .then(dataVault => {
         if (dataVault) {
-            bills = dataVault.bills || []; localStorage.setItem('karm_bills', JSON.stringify(bills));
-            expenses = dataVault.expenses || []; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
-            clientDB = dataVault.clients || []; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
-            renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown();
-            showGlobalToast("✅ Online Data Synced!", "ok");
+            var cloudBills = dataVault.bills || [];
+            var cloudExp = dataVault.expenses || [];
+            var cloudCli = dataVault.clients || [];
+
+            // UPGRADED SMART SYNC SHIELD: Now checks Clients length as well!
+            if (cloudBills.length >= bills.length && cloudExp.length >= expenses.length && cloudCli.length >= clientDB.length) {
+                bills = cloudBills; localStorage.setItem('karm_bills', JSON.stringify(bills));
+                expenses = cloudExp; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
+                clientDB = cloudCli; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
+                renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown();
+                showGlobalToast("✅ Cloud Data Synced!", "ok");
+            } else {
+                // Local data has MORE records than cloud. Protect local data and upload it!
+                showGlobalToast("⬆️ Local data is newer. Pushing to Cloud...", "inf");
+                autoSyncToCloud(true);
+            }
         } else {
-            showGlobalToast("✅ Connected. Cloud is currently empty.", "ok");
+            showGlobalToast("✅ Connected. Cloud is empty.", "ok");
+            // If the user has data but cloud is empty, push to cloud to seed it.
+            if(bills.length > 0 || expenses.length > 0 || clientDB.length > 0) {
+                autoSyncToCloud(true);
+            }
         }
     })
     .catch(() => showGlobalToast("⚠️ Offline Mode. Using local data.", "err"));
@@ -571,7 +584,17 @@ function forceCloudBackup() {
 function forceCloudRestore() {
     var url = getCleanDbUrl();
     if (!url) { alert("Firebase URL is missing."); return; }
-    autoSyncFromCloud();
+    // Force bypass the Smart Shield
+    showGlobalToast("🔄 Forcing Download from Cloud...", "inf");
+    fetch(url + "/karm_database.json").then(res => res.json()).then(dataVault => {
+        if(dataVault) {
+            bills = dataVault.bills || []; localStorage.setItem('karm_bills', JSON.stringify(bills));
+            expenses = dataVault.expenses || []; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
+            clientDB = dataVault.clients || []; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
+            renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown();
+            showGlobalToast("✅ Cloud Data Forced Restored!", "ok");
+        }
+    });
 }
 
 // ==========================================
@@ -755,12 +778,13 @@ function saveClient() {
   localStorage.setItem('karm_clients', JSON.stringify(clientDB));
   document.getElementById('cli-dept').value = ''; document.getElementById('cli-desig').value = ''; document.getElementById('cli-addr').value = '';
   document.getElementById('cli-st').textContent='✓ Saved!'; document.getElementById('cli-st').className='st ok'; document.getElementById('cli-st').style.display='block';
-  renderClients(); autoSyncToCloud(true);
+  renderClients(); 
+  autoSyncToCloud(true); // Upload client immediately
 }
 function renderClients() {
   var c = document.getElementById('clients-list'); if(clientDB.length === 0) { c.innerHTML = '<div class="emp">No clients saved.</div>'; return; }
   var html = '<table class="btbl"><thead><tr><th>Department</th><th>Designation</th><th>Address</th><th>Action</th></tr></thead><tbody>';
-  for(var i=0; i<clientDB.length; i++) { var cli = clientDB[i]; html += '<tr><td style="font-weight:bold;">' + cli.dept + '</td><td>' + cli.desig + '</td><td>' + cli.addr + '</td><td><button class="btn" style="padding:4px 10px;font-size:11px;background:#FDECEA;color:#C62828;border:none;" onclick="deleteClient(\'' + cli.id + '\')">🗑</button></td></tr>'; }
+  for(var i=0; i<clientDB.length; i++) { var cli = clientDB[i]; html += '<tr><td style="font-weight:bold;">' + cli.dept + '</td><td>' + cli.desig + '</td><td>' + cli.addr + '</td><td><button class="btn" style="padding:4px 10px;font-size:11px;background:#FDECEA;color:#C62828;border:none;" onclick="deleteClient(\'' + cli.id + '\')" title="Delete this client">🗑</button></td></tr>'; }
   c.innerHTML = html + '</tbody></table>';
 }
 function deleteClient(id) { if(confirm("Delete?")) { clientDB = clientDB.filter(function(c){ return c.id !== id; }); localStorage.setItem('karm_clients', JSON.stringify(clientDB)); renderClients(); autoSyncToCloud(true); } }
@@ -778,7 +802,7 @@ function autoFillClient() {
 function addItem(data) {
   var idx = items.length; items.push(data || {scope:'', details:'', amt:0, charge:0, payable:0}); var v = items[idx];
   var d = document.createElement('div'); d.className = 'wi'; d.id = 'wi' + idx;
-  d.innerHTML = '<div class="wi-hdr"><span class="wi-num">Work Item ' + (idx+1) + '</span><button class="rbtn" onclick="removeItem(' + idx + ')">✕ Remove</button></div><div class="f" style="margin-bottom:10px;"><label>Scope of Work</label><textarea id="ws' + idx + '" oninput="upd(' + idx + ')">' + v.scope + '</textarea></div><div class="f" style="margin-bottom:10px;"><label>Details</label><textarea id="wd' + idx + '" oninput="upd(' + idx + ')">' + v.details + '</textarea></div><div class="g3"><div class="f"><label>Certified Amt (₹)</label><input type="number" id="wa' + idx + '" value="' + (v.amt||'') + '" oninput="upd(' + idx + ');recalc()"></div><div class="f"><label>Charge %</label><input type="number" id="wc' + idx + '" value="' + (v.charge||'') + '" step="0.01" oninput="upd(' + idx + ');recalc()"></div><div class="f"><label>Payable (₹)</label><input id="wp' + idx + '" readonly value="' + (v.payable ? v.payable.toFixed(2) : '') + '"></div></div>';
+  d.innerHTML = '<div class="wi-hdr"><span class="wi-num">Work Item ' + (idx+1) + '</span><button class="rbtn" onclick="removeItem(' + idx + ')" title="Remove this work item row">✕ Remove</button></div><div class="f" style="margin-bottom:10px;"><label>Scope of Work</label><textarea id="ws' + idx + '" oninput="upd(' + idx + ')" title="Description of work done">' + v.scope + '</textarea></div><div class="f" style="margin-bottom:10px;"><label>Details</label><textarea id="wd' + idx + '" oninput="upd(' + idx + ')" title="Detailed measurements or comments">' + v.details + '</textarea></div><div class="g3"><div class="f"><label>Certified Amt (₹)</label><input type="number" id="wa' + idx + '" value="' + (v.amt||'') + '" oninput="upd(' + idx + ');recalc()" title="Total Certified Amount"></div><div class="f"><label>Charge %</label><input type="number" id="wc' + idx + '" value="' + (v.charge||'') + '" step="0.01" oninput="upd(' + idx + ');recalc()" title="Percentage charged"></div><div class="f"><label>Payable (₹)</label><input id="wp' + idx + '" readonly value="' + (v.payable ? v.payable.toFixed(2) : '') + '" title="Calculated Payable Amount"></div></div>';
   document.getElementById('wi-con').appendChild(d); recalc();
 }
 function removeItem(idx) { document.getElementById('wi'+idx).parentNode.removeChild(document.getElementById('wi'+idx)); items[idx] = null; recalc(); }
@@ -858,7 +882,7 @@ function deleteExpense(id) { if (confirm('Delete?')) { expenses = expenses.filte
 function renderExpenses() {
   var c = document.getElementById('expenses-list'); if(expenses.length === 0) { c.innerHTML = '<div class="emp">No expenses yet.</div>'; return; }
   var html = '<table class="btbl"><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Action</th></tr></thead><tbody>';
-  for(var i=0; i<expenses.length; i++) { var e = expenses[i]; html += '<tr><td>' + fmtD(e.date) + '</td><td>' + e.desc + '</td><td style="color:#C62828; font-weight:bold;">₹ ' + e.amount.toLocaleString('en-IN') + '</td><td><button class="btn r" style="padding:4px 10px;font-size:11px;border:none;" onclick="deleteExpense(\'' + e.id + '\')">🗑</button></td></tr>'; }
+  for(var i=0; i<expenses.length; i++) { var e = expenses[i]; html += '<tr><td>' + fmtD(e.date) + '</td><td>' + e.desc + '</td><td style="color:#C62828; font-weight:bold;">₹ ' + e.amount.toLocaleString('en-IN') + '</td><td><button class="btn r" style="padding:4px 10px;font-size:11px;border:none;" onclick="deleteExpense(\'' + e.id + '\')" title="Delete this expense">🗑</button></td></tr>'; }
   c.innerHTML = html + '</tbody></table>';
 }
 
@@ -971,13 +995,13 @@ function renderBills() {
     var pDateStr = b.lastPaymentDate ? '<br><span style="font-size:9px; color:#A0B2C6; display:block; margin-top:2px;">Paid: ' + fmtD(b.lastPaymentDate) + '</span>' : '';
     var statusBtn = '';
     
-    if (b.status === 'Paid') { statusBtn = '<button class="btn" style="padding:4px 10px;font-size:10px;background:#E8F5E9;color:#27AE60;border:none;flex-direction:column;align-items:center;" onclick="addPayment(\'' + b.id + '\')">✓ PAID</button>' + pDateStr; } 
-    else if (b.status !== 'Paid' && daysOld > 30) { statusBtn = '<button class="btn" style="padding:4px 10px;font-size:10px;background:#FDECEA;color:#C0392B;border:none;flex-direction:column;align-items:center;" onclick="addPayment(\'' + b.id + '\')">🚨 OVERDUE (' + daysOld + 'd)</button>'; } 
-    else { statusBtn = '<button class="btn" style="padding:4px 10px;font-size:10px;background:#FFF9E6;color:#F39C12;border:none;flex-direction:column;align-items:center;" onclick="addPayment(\'' + b.id + '\')">⏳ PENDING</button>'; }
+    if (b.status === 'Paid') { statusBtn = '<button class="btn" style="padding:4px 10px;font-size:10px;background:#E8F5E9;color:#27AE60;border:none;flex-direction:column;align-items:center;" onclick="addPayment(\'' + b.id + '\')" title="Click to view or revert payment">✓ PAID</button>' + pDateStr; } 
+    else if (b.status !== 'Paid' && daysOld > 30) { statusBtn = '<button class="btn" style="padding:4px 10px;font-size:10px;background:#FDECEA;color:#C0392B;border:none;flex-direction:column;align-items:center;" onclick="addPayment(\'' + b.id + '\')" title="Click to mark this bill as paid">🚨 OVERDUE (' + daysOld + 'd)</button>'; } 
+    else { statusBtn = '<button class="btn" style="padding:4px 10px;font-size:10px;background:#FFF9E6;color:#F39C12;border:none;flex-direction:column;align-items:center;" onclick="addPayment(\'' + b.id + '\')" title="Click to mark this bill as paid">⏳ PENDING</button>'; }
 
-    var docBtn = (b.driveLink && b.driveLink.trim() !== '') ? '<a href="' + (b.driveLink.startsWith('http')?b.driveLink:'https://'+b.driveLink) + '" target="_blank" class="btn" style="padding:4px 8px;font-size:11px;background:#E3F2FD;color:#2980B9;border:none;text-decoration:none;">📁</a>' : '';
+    var docBtn = (b.driveLink && b.driveLink.trim() !== '') ? '<a href="' + (b.driveLink.startsWith('http')?b.driveLink:'https://'+b.driveLink) + '" target="_blank" class="btn" style="padding:4px 8px;font-size:11px;background:#E3F2FD;color:#2980B9;border:none;text-decoration:none;" title="Open attached Google Drive Link">📁</a>' : '';
 
-    html += '<tr><td style="font-weight:700; color:#5C6B73;">' + (b.billNo||'-') + '</td><td style="color:#7B8A9C;">' + (b.toDept||'-') + '</td><td style="color:#7B8A9C;">' + (b.date ? fmtD(b.date) : '-') + '</td><td style="font-weight:700; color:#4A90E2;">₹ ' + finalAmtStr + '</td><td style="vertical-align:middle; text-align:center;">' + statusBtn + '</td><td style="display:flex;gap:5px;flex-wrap:wrap;min-width:160px;"><button class="btn" style="padding:4px 8px;font-size:11px;border:1px solid #DDE4EE;" onclick="loadBill(\'' + b.id + '\')">✎</button><button class="btn" style="padding:4px 8px;font-size:11px;background:#F5CBA7;color:#D35400;border:none;" onclick="openPrint(\'bill\', \'' + b.id + '\')">🖨</button>' + docBtn + '<button class="btn" style="padding:4px 8px;font-size:11px;background:#FADBD8;color:#C0392B;border:none;" onclick="deleteBill(\'' + b.id + '\')">✕</button></td></tr>';
+    html += '<tr><td style="font-weight:700; color:#5C6B73;">' + (b.billNo||'-') + '</td><td style="color:#7B8A9C;">' + (b.toDept||'-') + '</td><td style="color:#7B8A9C;">' + (b.date ? fmtD(b.date) : '-') + '</td><td style="font-weight:700; color:#4A90E2;">₹ ' + finalAmtStr + '</td><td style="vertical-align:middle; text-align:center;">' + statusBtn + '</td><td style="display:flex;gap:5px;flex-wrap:wrap;min-width:160px;"><button class="btn" style="padding:4px 8px;font-size:11px;border:1px solid #DDE4EE;" onclick="loadBill(\'' + b.id + '\')" title="Edit this bill">✎</button><button class="btn" style="padding:4px 8px;font-size:11px;background:#F5CBA7;color:#D35400;border:none;" onclick="openPrint(\'bill\', \'' + b.id + '\')" title="Print or preview this bill">🖨</button>' + docBtn + '<button class="btn" style="padding:4px 8px;font-size:11px;background:#FADBD8;color:#C0392B;border:none;" onclick="deleteBill(\'' + b.id + '\')" title="Permanently delete this bill">✕</button></td></tr>';
   }
   c.innerHTML = html + '</tbody></table>';
 }
