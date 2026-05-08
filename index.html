@@ -85,13 +85,11 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 .btn.g:hover { background: #7DCEA0; }
 .btn.r { background: #F5B7B1; color: #922B21; box-shadow: 0 4px 12px rgba(245, 183, 177, 0.4); } 
 
-/* STATUS MESSAGES */
+/* STATUS MESSAGES & TOAST */
 .st { font-size: 13px; padding: 12px 16px; border-radius: 8px; margin-top: 1rem; display: none; font-weight: 600; text-align: center; }
 .st.ok { background: #E8F5E9; color: #2E7D32; display: block; border: 1px solid #C8E6C9; }
 .st.err { background: #FDECEA; color: #C62828; display: block; border: 1px solid #FFCDD2; }
 .st.inf { background: #E3F2FD; color: #1565C0; display: block; border: 1px solid #BBDEFB; }
-
-/* GLOBAL TOAST NOTIFICATION */
 #global-toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 12px 24px; border-radius: 30px; display: none; z-index: 9999; font-size: 14px; font-weight: bold; box-shadow: 0 6px 20px rgba(0,0,0,0.3); transition: opacity 0.3s; }
 
 /* TABLES */
@@ -102,24 +100,22 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 .btbl tr:hover td { background: #FAFCFF; }
 .emp { text-align: center; padding: 4rem; color: #A0B2C6; font-size: 15px; font-style: italic; }
 
-/* HERO VIDEO/IMAGE STYLES */
+/* HERO VIDEO/IMAGE */
 .hero-container { position: relative; width: 100%; height: 400px; border-radius: 12px; overflow: hidden; background: #EAEef4; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(163, 177, 198, 0.2); }
 #bg-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translate(-50%, -50%); object-fit: cover; }
 .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(157, 188, 212, 0.3), rgba(26, 58, 92, 0.5)); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; backdrop-filter: blur(1px); }
 .hero-overlay h2 { font-size: 3.5rem; margin-bottom: 10px; text-shadow: 0 4px 15px rgba(0,0,0,0.3); font-weight: 800; letter-spacing: 2px; }
 
-/* PASTEL DASHBOARD CARDS */
+/* DASHBOARD CARDS */
 .dash-card { margin: 0; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: none; }
 .dc-title { font-size: 10px; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; }
 .dc-val { font-size: 24px; font-weight: 800; }
 
-/* PAYMENT MODAL */
+/* PAYMENT MODAL & LOGIN SCREEN */
 #payment-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(200, 210, 224, 0.6); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(3px); }
 .modal-box { background: #fff; width: 90%; max-width: 400px; border-radius: 12px; padding: 25px; box-shadow: 0 10px 30px rgba(163, 177, 198, 0.3); animation: fadeIn 0.3s; }
 .modal-box h3 { color: #5C8EAD; margin-bottom: 15px; font-size: 18px; display:flex; align-items:center; gap:8px;}
 .modal-info { background: #FAFCFF; padding: 15px; border-radius: 8px; border: 1px solid #EAEef4; margin-bottom: 20px; font-size: 14px; color: #5C6B73; line-height: 1.6; text-align: center;}
-
-/* LOGIN SCREEN STYLES */
 #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #F7F9FC; display: flex; align-items: center; justify-content: center; z-index: 5000; }
 .login-box { background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(163, 177, 198, 0.2); width: 100%; max-width: 350px; text-align: center; }
 .login-box h2 { color: #5C8EAD; margin-bottom: 5px; font-size: 22px; }
@@ -229,38 +225,44 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       
       <div class="hdr-actions">
         <button class="logout-btn" onclick="logout()">Logout</button>
-        <div class="settings-gear" onclick="toggleSetup()" title="Upload Images & Video Settings">⚙️</div>
+        <div class="settings-gear" onclick="toggleSetup()" title="Upload Images & Backup Settings">⚙️</div>
       </div>
     </div>
 
     <div id="setup-card" class="card" style="background:#F0F4F8; display: none;">
       <div class="ct" style="color:#5C8EAD; display:flex; justify-content:space-between;">
-        <span>⚙️ Settings & Media (Saved to Browser)</span>
+        <span>⚙️ Local Vault & Media Settings</span>
         <button onclick="toggleSetup()" style="background:none; border:none; color:#ECA29B; font-weight:bold; cursor:pointer;">✕ Close</button>
       </div>
+
+      <div style="background:#FFF; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #EAEef4;">
+        <h4 style="color:#1a3a5c; margin-bottom:10px; font-size:14px;">☁️ Firebase Cloud Sync</h4>
+        <p style="font-size:12px; color:#7B8A9C; margin-bottom:15px;">Sync your entire database automatically to Firebase. This runs automatically on login and save.</p>
+        
+        <input type="file" id="backup-file" style="display:none;" accept=".json" onchange="restoreBackup(event)">
+        <div class="btnrow" style="margin-top:0;">
+            <button class="btn p" onclick="forceCloudBackup()">☁️ Force Upload to Cloud</button>
+            <button class="btn g" onclick="forceCloudRestore()">📥 Force Download from Cloud</button>
+            <button class="btn" style="background:#EAEef4; color:#5C6B73; border:none;" onclick="downloadBackup()">💽 Download Local .json Backup</button>
+            <button class="btn" style="background:#EAEef4; color:#5C6B73; border:none;" onclick="document.getElementById('backup-file').click()">📂 Restore from .json</button>
+        </div>
+      </div>
+
       <div class="g4">
         <div class="f"><label>1. Firm Logo</label><input type="file" accept="image/*" onchange="uploadLogo(this)"></div>
         <div class="f"><label>2. A4 Letterhead (PDF)</label><input type="file" accept="image/*" onchange="uploadLetterhead(this)"></div>
         <div class="f"><label>3. Mobile Welcome Image</label><input type="file" accept="image/*" onchange="uploadDashImage(this)"></div>
         <div class="f"><label>4. Hero Video URL (.mp4)</label><input type="text" id="video-url-input" placeholder="Paste an MP4 link here" onchange="saveVideoUrl(this.value)"></div>
       </div>
-      <div class="btnrow" style="margin-top:15px; justify-content:flex-end;">
-          <button class="btn g" onclick="syncFromCloud()">🔄 Force Cloud Sync Now</button>
-      </div>
     </div>
 
     <div id="tab-dashboard" class="sec active">
       <div class="hero-container">
-          <video id="bg-video" autoplay loop muted playsinline>
-              <source id="video-source" src="" type="video/mp4">
-          </video>
+          <video id="bg-video" autoplay loop muted playsinline><source id="video-source" src="" type="video/mp4"></video>
           <img id="dash-welcome-img" src="" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; display:none; z-index: 1;">
-          
           <div class="hero-overlay" style="z-index: 2;">
               <h2>Welcome</h2>
-              <p id="video-status" style="font-size: 14px; opacity: 0.8; letter-spacing: 1px;">
-                KARM Consultancy Services
-              </p>
+              <p id="video-status" style="font-size: 14px; opacity: 0.8; letter-spacing: 1px;">KARM Consultancy Services</p>
           </div>
       </div>
     </div>
@@ -269,9 +271,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       <div class="card" style="background:#F4F9F5;">
         <div class="f">
           <label style="color:#2D5A27;">👥 Quick Fill from Client Database</label>
-          <select id="quick-client" onchange="autoFillClient()" style="border-color:#A9DFBF;">
-            <option value="">-- Type manually or select a saved client --</option>
-          </select>
+          <select id="quick-client" onchange="autoFillClient()" style="border-color:#A9DFBF;"><option value="">-- Type manually or select a saved client --</option></select>
         </div>
       </div>
 
@@ -300,11 +300,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         </div>
       </div>
 
-      <div class="card">
-        <div class="ct">Work Items</div>
-        <div id="wi-con"></div>
-        <button class="addbtn" onclick="addItem()">＋ Add Work Item</button>
-      </div>
+      <div class="card"><div class="ct">Work Items</div><div id="wi-con"></div><button class="addbtn" onclick="addItem()">＋ Add Work Item</button></div>
 
       <div class="card">
         <div class="ct">GST &amp; Totals</div>
@@ -318,14 +314,11 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 
       <div class="card" style="background:#F0F7FF;">
         <div class="ct" style="color:#4A90E2;">Cloud Attachments</div>
-        <div class="f">
-          <label style="color:#5C8EAD;">📁 Google Drive Link (For Signed PDF, Photos, or MB)</label>
-          <input type="url" id="drive-link" placeholder="https://drive.google.com/file/d/..." style="border-color:#AEC6CF;">
-        </div>
+        <div class="f"><label style="color:#5C8EAD;">📁 Google Drive Link (For Signed PDF, Photos, or MB)</label><input type="url" id="drive-link" placeholder="https://drive.google.com/file/d/..." style="border-color:#AEC6CF;"></div>
       </div>
 
       <div class="btnrow">
-        <button class="btn p" onclick="saveBill()">💾 Save & Sync</button>
+        <button class="btn p" onclick="saveBill()">💾 Save & Auto-Sync</button>
         <button class="btn" style="background:#F5CBA7; color:#E65100; border:none;" onclick="openPrint('bill')">🖨 Preview PDF</button>
         <button class="btn" style="border:none; background:#F0F4F8; color:#7B8A9C;" onclick="clearForm()">↺ Clear</button>
       </div>
@@ -338,9 +331,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
           <div class="ct" style="margin:0;">Saved Bills (Click Status to Update)</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
             <input type="date" id="date-filter" style="width:130px;" onchange="renderBills()" title="Filter by Date">
-            <select id="client-filter" style="width:170px; text-overflow:ellipsis;" onchange="renderBills()">
-              <option value="">All Clients</option>
-            </select>
+            <select id="client-filter" style="width:170px; text-overflow:ellipsis;" onchange="renderBills()"><option value="">All Clients</option></select>
             <input placeholder="Search..." id="search-input" style="width:150px;" oninput="renderBills()">
           </div>
         </div>
@@ -359,15 +350,9 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
           <div class="f"><label style="color:#ECA29B;">Description / Vendor</label><input type="text" id="exp-desc" placeholder="e.g., Supplies..." style="border-color:#F5B7B1;"></div>
           <div class="f"><label style="color:#ECA29B;">Amount (₹)</label><input type="number" id="exp-amt" placeholder="0.00" style="border-color:#F5B7B1;"></div>
         </div>
-        <div class="btnrow">
-          <button class="btn r" onclick="saveExpense()">💸 Save Expense</button>
-        </div>
-        <div class="st" id="exp-st"></div>
+        <div class="btnrow"><button class="btn r" onclick="saveExpense()">💸 Save Expense</button></div>
       </div>
-      <div class="card">
-        <div class="ct">Recent Expenses</div>
-        <div id="expenses-list"></div>
-      </div>
+      <div class="card"><div class="ct">Recent Expenses</div><div id="expenses-list"></div></div>
     </div>
 
     <div id="tab-clients" class="sec">
@@ -378,15 +363,9 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
           <div class="f"><label style="color:#7DCEA0;">Primary Designation</label><input type="text" id="cli-desig" placeholder="e.g., The Chief Officer" style="border-color:#A9DFBF;"></div>
         </div>
         <div class="f" style="margin-bottom:12px;"><label style="color:#7DCEA0;">Standard Address</label><input type="text" id="cli-addr" placeholder="e.g., Mandvi - Kachchh" style="border-color:#A9DFBF;"></div>
-        <div class="btnrow">
-          <button class="btn g" onclick="saveClient()">👥 Save Client</button>
-        </div>
-        <div class="st" id="cli-st"></div>
+        <div class="btnrow"><button class="btn g" onclick="saveClient()">👥 Save Client</button></div>
       </div>
-      <div class="card">
-        <div class="ct">Saved Clients</div>
-        <div id="clients-list"></div>
-      </div>
+      <div class="card"><div class="ct">Saved Clients</div><div id="clients-list"></div></div>
     </div>
 
     <div id="tab-reports" class="sec">
@@ -406,9 +385,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         </div>
         <div class="f" style="margin-bottom:15px; max-width: 350px;">
           <label style="color:#27AE60;">Select Client to Generate Statement</label>
-          <select id="ledger-client-select" onchange="generateLedger()" style="border-color:#A9DFBF;">
-            <option value="">-- Choose a Client --</option>
-          </select>
+          <select id="ledger-client-select" onchange="generateLedger()" style="border-color:#A9DFBF;"><option value="">-- Choose a Client --</option></select>
         </div>
         <div id="ledger-results" style="display:none;">
           <div class="g3" style="margin-bottom:15px;">
@@ -424,18 +401,9 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         <div class="ct" style="color:#E67E22; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
           <span>📊 Custom Period GST Summary</span>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <span style="font-size:12px; color:#A0B2C6;">From:</span>
-            <input type="date" id="rep-start" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
-            
-            <span style="font-size:12px; color:#A0B2C6;">To:</span>
-            <input type="date" id="rep-end" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
-            
-            <select id="rep-status-filter" style="border-color:#FDEBD0; background:#fff; padding:6px 10px; font-size:12px; border-radius:6px;" onchange="renderReports()">
-              <option value="all">All Bills</option>
-              <option value="paid">Only Received (Paid)</option>
-              <option value="pending">Only Pending</option>
-            </select>
-
+            <span style="font-size:12px; color:#A0B2C6;">From:</span><input type="date" id="rep-start" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
+            <span style="font-size:12px; color:#A0B2C6;">To:</span><input type="date" id="rep-end" onchange="renderReports()" style="border-color:#FDEBD0; background:#fff; padding:6px 10px;">
+            <select id="rep-status-filter" style="border-color:#FDEBD0; background:#fff; padding:6px 10px; font-size:12px; border-radius:6px;" onchange="renderReports()"><option value="all">All Bills</option><option value="paid">Only Received (Paid)</option><option value="pending">Only Pending</option></select>
             <button class="btn" style="background:#FFF3E0; color:#E67E22; border:none; padding:6px 12px; font-size:12px;" onclick="exportReportToExcel()">📊 Download Excel</button>
           </div>
         </div>
@@ -466,9 +434,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         <div class="b-to" id="pr-to"></div>
         <div class="b-wo" id="pr-wo"></div>
         <table class="b-tbl">
-          <thead>
-            <tr><th style="width:22pt;">Sr.<br>No</th><th>Name of Work</th><th style="width:52pt;">Project Cost/<br>Certified Amount</th><th style="width:38pt;">Charge<br>of %age</th><th style="width:48pt;">Payble<br>Amount</th></tr>
-          </thead>
+          <thead><tr><th style="width:22pt;">Sr.<br>No</th><th>Name of Work</th><th style="width:52pt;">Project Cost/<br>Certified Amount</th><th style="width:38pt;">Charge<br>of %age</th><th style="width:48pt;">Payble<br>Amount</th></tr></thead>
           <tbody id="pr-items"></tbody>
           <tfoot id="pr-totals"></tfoot>
         </table>
@@ -505,12 +471,14 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 // ==========================================
 const OFFICE_USER = "admin@karm.in";
 const OFFICE_PASS = "KARM@2026";
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0azKXbpxO9Hp1ckYcTACNGv2MhplHyFsRMuJcNqriXImRZrWOxweUgHr41ca8WDUP/exec"; 
 
+// YOUR CLOUD DATABASE URL
+const FIREBASE_DB_URL = "https://karm-portal-default-rtdb.firebaseio.com/";
+
+// DATA ARRAYS
 var bills = []; var expenses = []; var clientDB = []; var items = []; var editId = null;
 let currentPaymentBillId = null;
 
-// INIT DATES
 var today = new Date();
 var firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
 var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
@@ -518,7 +486,7 @@ document.getElementById('rep-start').value = firstDay;
 document.getElementById('rep-end').value = lastDay;
 
 // ==========================================
-// GLOBAL TOAST NOTIFICATION
+// TOAST NOTIFICATIONS
 // ==========================================
 function showGlobalToast(msg, type) {
     var toast = document.getElementById('global-toast');
@@ -527,15 +495,109 @@ function showGlobalToast(msg, type) {
     toast.style.display = 'block';
     toast.style.opacity = '1';
     if (type !== 'inf') {
-        setTimeout(function() {
-            toast.style.opacity = '0';
-            setTimeout(function(){ toast.style.display = 'none'; }, 300);
-        }, 3000);
+        setTimeout(function() { toast.style.opacity = '0'; setTimeout(function(){ toast.style.display = 'none'; }, 300); }, 3000);
     }
 }
 
 // ==========================================
-// AUTHENTICATION & AUTO-SYNC LOGIC
+// FIREBASE AUTO-SYNC LOGIC
+// ==========================================
+function getCleanDbUrl() {
+    if (!FIREBASE_DB_URL || FIREBASE_DB_URL.includes("PASTE_YOUR")) return null;
+    return FIREBASE_DB_URL.endsWith('/') ? FIREBASE_DB_URL.slice(0, -1) : FIREBASE_DB_URL;
+}
+
+function autoSyncToCloud(silent = false) {
+    var url = getCleanDbUrl();
+    if (!url) return;
+    if(!silent) showGlobalToast("☁️ Auto-Syncing to Cloud...", "inf");
+
+    var dataVault = { bills: bills, expenses: expenses, clients: clientDB, timestamp: new Date().toISOString() };
+    
+    fetch(url + "/karm_database.json", {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataVault)
+    })
+    .then(res => res.json())
+    .then(() => { if(!silent) showGlobalToast("✅ Cloud Database Synced!", "ok"); })
+    .catch(() => { if(!silent) showGlobalToast("❌ Cloud Upload Failed.", "err"); });
+}
+
+function autoSyncFromCloud() {
+    var url = getCleanDbUrl();
+    if (!url) return;
+    showGlobalToast("🔄 Fetching latest data from Cloud...", "inf");
+
+    fetch(url + "/karm_database.json")
+    .then(res => res.json())
+    .then(dataVault => {
+        if (dataVault) {
+            bills = dataVault.bills || []; localStorage.setItem('karm_bills', JSON.stringify(bills));
+            expenses = dataVault.expenses || []; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
+            clientDB = dataVault.clients || []; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
+            renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown();
+            showGlobalToast("✅ Online Data Synced!", "ok");
+        } else {
+            showGlobalToast("✅ Connected. Cloud is currently empty.", "ok");
+        }
+    })
+    .catch(() => showGlobalToast("⚠️ Offline Mode. Using local data.", "err"));
+}
+
+function forceCloudBackup() {
+    var url = getCleanDbUrl();
+    if (!url) { alert("Firebase URL is missing."); return; }
+    autoSyncToCloud(false);
+}
+
+function forceCloudRestore() {
+    var url = getCleanDbUrl();
+    if (!url) { alert("Firebase URL is missing."); return; }
+    autoSyncFromCloud();
+}
+
+// ==========================================
+// OFFLINE BACKUP & RESTORE (.json file)
+// ==========================================
+function downloadBackup() {
+    if(bills.length === 0 && expenses.length === 0 && clientDB.length === 0) {
+        showGlobalToast("⚠️ Database is empty. Nothing to backup.", "err");
+        return;
+    }
+    var dataVault = { bills: bills, expenses: expenses, clients: clientDB, timestamp: new Date().toISOString() };
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataVault));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "KARM_Backup_" + new Date().toISOString().split('T')[0] + ".json");
+    document.body.appendChild(downloadAnchorNode); 
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    showGlobalToast("✅ Local Backup Downloaded Successfully!", "ok");
+}
+
+function restoreBackup(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var dataVault = JSON.parse(e.target.result);
+            if (dataVault.bills || dataVault.expenses || dataVault.clients) {
+                bills = dataVault.bills || []; localStorage.setItem('karm_bills', JSON.stringify(bills));
+                expenses = dataVault.expenses || []; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
+                clientDB = dataVault.clients || []; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
+                alert("✅ Local Database Restored Successfully! The page will now reload.");
+                location.reload();
+            } else { alert("❌ Invalid backup file format."); }
+        } catch(err) { alert("❌ Error reading backup file."); }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; 
+}
+
+// ==========================================
+// AUTHENTICATION LOGIC
 // ==========================================
 function checkLogin() {
     const u = document.getElementById('user-email').value;
@@ -545,47 +607,19 @@ function checkLogin() {
         document.getElementById('main-app').style.display = 'block';
         sessionStorage.setItem('karm_auth', 'true');
         loadLocalData();
-        syncFromCloud(); 
+        autoSyncFromCloud();
     } else {
         document.getElementById('login-err').style.display = 'block';
     }
 }
 
-function logout() {
-    sessionStorage.removeItem('karm_auth');
-    location.reload();
-}
+function logout() { sessionStorage.removeItem('karm_auth'); location.reload(); }
 
 if(sessionStorage.getItem('karm_auth') === 'true') {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
     loadLocalData();
-    syncFromCloud(); 
-}
-
-// ==========================================
-// AUTOMATED CLOUD SYNC ENGINE
-// ==========================================
-function syncFromCloud() {
-    showGlobalToast("🔄 Auto-syncing from Cloud...", "inf");
-    fetch(GOOGLE_SCRIPT_URL + "?action=getBills")
-      .then(response => response.json())
-      .then(data => {
-         if(Array.isArray(data)) {
-            bills = data; 
-            localStorage.setItem('karm_bills', JSON.stringify(bills));
-            renderBills();
-            updateClientFilter();
-            updateLedgerDropdown();
-            showGlobalToast("✅ Live Cloud Data Synced!", "ok");
-         } else {
-            showGlobalToast("✅ Live Cloud Data Synced!", "ok");
-         }
-      })
-      .catch(err => {
-         console.error(err);
-         showGlobalToast("⚠️ Offline Mode. Could not reach cloud.", "err");
-      });
+    autoSyncFromCloud();
 }
 
 // ==========================================
@@ -623,9 +657,7 @@ function toggleSidebar() {
   else { sb.classList.add('open'); ov.classList.add('show'); }
 }
 
-function toggleSetup() {
-  var el = document.getElementById('setup-card'); el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
-}
+function toggleSetup() { var el = document.getElementById('setup-card'); el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none'; }
 
 function saveVideoUrl(url) {
   if(url && url.trim() !== '') {
@@ -697,7 +729,7 @@ function saveClient() {
   localStorage.setItem('karm_clients', JSON.stringify(clientDB));
   document.getElementById('cli-dept').value = ''; document.getElementById('cli-desig').value = ''; document.getElementById('cli-addr').value = '';
   document.getElementById('cli-st').textContent='✓ Saved!'; document.getElementById('cli-st').className='st ok'; document.getElementById('cli-st').style.display='block';
-  renderClients();
+  renderClients(); autoSyncToCloud(true);
 }
 function renderClients() {
   var c = document.getElementById('clients-list'); if(clientDB.length === 0) { c.innerHTML = '<div class="emp">No clients saved.</div>'; return; }
@@ -705,7 +737,7 @@ function renderClients() {
   for(var i=0; i<clientDB.length; i++) { var cli = clientDB[i]; html += '<tr><td style="font-weight:bold;">' + cli.dept + '</td><td>' + cli.desig + '</td><td>' + cli.addr + '</td><td><button class="btn" style="padding:4px 10px;font-size:11px;background:#FDECEA;color:#C62828;border:none;" onclick="deleteClient(\'' + cli.id + '\')">🗑</button></td></tr>'; }
   c.innerHTML = html + '</tbody></table>';
 }
-function deleteClient(id) { if(confirm("Delete?")) { clientDB = clientDB.filter(function(c){ return c.id !== id; }); localStorage.setItem('karm_clients', JSON.stringify(clientDB)); renderClients(); } }
+function deleteClient(id) { if(confirm("Delete?")) { clientDB = clientDB.filter(function(c){ return c.id !== id; }); localStorage.setItem('karm_clients', JSON.stringify(clientDB)); renderClients(); autoSyncToCloud(true); } }
 function populateQuickClientSelect() {
   var sel = document.getElementById('quick-client'); var html = '<option value="">-- Select Client --</option>';
   for(var i=0; i<clientDB.length; i++) { html += '<option value="'+clientDB[i].id+'">' + clientDB[i].dept + '</option>'; }
@@ -750,6 +782,7 @@ function getData() {
   }
   return { type: 'bill', id: editId || Date.now().toString(), gst: v('gst'), pan: v('pan'), billNo: v('billno'), siteLoc: v('siteloc'), date: v('billdate'), toDesig: v('todesig'), toDept: v('todept'), toAddr: v('toaddr'), workOrder: v('workorder'), driveLink: v('drive-link'), items: ai, cgstRate: cr, sgstRate: sr, totalNoGST: tot, cgst: cgst, sgst: sgst, grand: grand, say: say, amountPaid: amtPaid, lastPaymentDate: pDate, words: 'Rupees ' + n2w(say) + ' Only.', savedAt: new Date().toISOString(), status: (amtPaid >= say ? 'Paid' : 'Pending') };
 }
+
 function store(d) {
   var found = false; for(var i=0; i<bills.length; i++) { if(bills[i].id === d.id) { bills[i] = d; found = true; break; } }
   if(!found) bills.unshift(d); localStorage.setItem('karm_bills', JSON.stringify(bills));
@@ -757,11 +790,10 @@ function store(d) {
 
 function saveBill() {
   var d = getData(); if(!d.billNo) { showSt('Enter Bill No.', 'err'); return; }
-  store(d); editId = d.id; updateClientFilter(); updateLedgerDropdown(); showSt('✓ Saving...', 'inf');
-  
-  fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })
-    .then(() => { showSt('✓ Synced to Cloud!', 'ok'); syncFromCloud(); })
-    .catch(() => showSt('Local saved (Cloud unreachable).', 'err'));
+  store(d); editId = d.id; updateClientFilter(); updateLedgerDropdown(); 
+  showSt('✓ Bill Saved Locally!', 'ok');
+  renderBills();
+  autoSyncToCloud(false);
 }
 
 function addPayment(id) {
@@ -776,23 +808,15 @@ function closePaymentModal() { document.getElementById('payment-modal').style.di
 function confirmPayment() {
   if(!currentPaymentBillId) return; var bill = bills.find(function(b){ return b.id === currentPaymentBillId; }); if(!bill) return;
   bill.amountPaid = bill.say; bill.lastPaymentDate = document.getElementById('pay-date').value; bill.status = 'Paid'; 
-  
   localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); closePaymentModal();
-  
-  showGlobalToast("🔄 Syncing payment to Cloud...", "inf");
-  fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bill) })
-    .then(() => showGlobalToast('✅ Payment Synced!', 'ok'));
+  autoSyncToCloud(false);
 }
 
 function unmarkPayment() {
   if(!currentPaymentBillId) return; var bill = bills.find(function(b){ return b.id === currentPaymentBillId; }); if(!bill) return;
   bill.amountPaid = 0; bill.lastPaymentDate = ''; bill.status = 'Pending';
-  
   localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); closePaymentModal();
-  
-  showGlobalToast("🔄 Syncing update to Cloud...", "inf");
-  fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bill) })
-    .then(() => showGlobalToast('✅ Reverted to Pending!', 'ok'));
+  autoSyncToCloud(false);
 }
 
 function saveExpense() {
@@ -801,10 +825,10 @@ function saveExpense() {
   var expData = { type: 'expense', id: 'EXP_' + Date.now().toString(), date: date, desc: desc, amount: amt };
   expenses.unshift(expData); localStorage.setItem('karm_expenses', JSON.stringify(expenses)); renderExpenses(); renderBills();
   document.getElementById('exp-desc').value = ''; document.getElementById('exp-amt').value = '';
-  document.getElementById('exp-st').textContent = '✓ Saved!'; document.getElementById('exp-st').className = 'st ok'; document.getElementById('exp-st').style.display = 'block';
-  fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(expData) });
+  document.getElementById('exp-st').textContent = '✓ Saved Locally!'; document.getElementById('exp-st').className = 'st ok'; document.getElementById('exp-st').style.display = 'block';
+  autoSyncToCloud(true);
 }
-function deleteExpense(id) { if (confirm('Delete?')) { expenses = expenses.filter(function(e) { return e.id !== id; }); localStorage.setItem('karm_expenses', JSON.stringify(expenses)); renderExpenses(); renderBills(); } }
+function deleteExpense(id) { if (confirm('Delete?')) { expenses = expenses.filter(function(e) { return e.id !== id; }); localStorage.setItem('karm_expenses', JSON.stringify(expenses)); renderExpenses(); renderBills(); autoSyncToCloud(true); } }
 function renderExpenses() {
   var c = document.getElementById('expenses-list'); if(expenses.length === 0) { c.innerHTML = '<div class="emp">No expenses yet.</div>'; return; }
   var html = '<table class="btbl"><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Action</th></tr></thead><tbody>';
@@ -836,9 +860,6 @@ function generateLedger() {
   document.getElementById('led-total').textContent = '₹ ' + tBilled.toLocaleString('en-IN'); document.getElementById('led-paid').textContent = '₹ ' + tPaid.toLocaleString('en-IN'); document.getElementById('led-due').textContent = '₹ ' + tDue.toLocaleString('en-IN'); document.getElementById('ledger-table-container').innerHTML = html;
 }
 
-// ----------------------------------------------------
-// NEW REPORTING LOGIC WITH PAID/PENDING FILTERS
-// ----------------------------------------------------
 function renderReports() {
   var sDate = document.getElementById('rep-start').value; 
   var eDate = document.getElementById('rep-end').value;
@@ -849,21 +870,10 @@ function renderReports() {
   for(var i=0; i<bills.length; i++) {
     var b = bills[i];
     var pass = true;
-    
-    if(b.date) {
-      if (sDate && b.date < sDate) pass = false; 
-      if (eDate && b.date > eDate) pass = false; 
-    } else { pass = false; }
-    
+    if(b.date) { if (sDate && b.date < sDate) pass = false; if (eDate && b.date > eDate) pass = false; } else { pass = false; }
     if (statFilter === 'paid' && b.status !== 'Paid') pass = false;
     if (statFilter === 'pending' && b.status === 'Paid') pass = false;
-
-    if (pass) { 
-        mTaxable += (b.totalNoGST || 0); 
-        mCGST += (b.cgst || 0); 
-        mSGST += (b.sgst || 0); 
-        mTotal += (b.say || 0); 
-    }
+    if (pass) { mTaxable += (b.totalNoGST || 0); mCGST += (b.cgst || 0); mSGST += (b.sgst || 0); mTotal += (b.say || 0); }
   }
   
   if(document.getElementById('rep-taxable')) document.getElementById('rep-taxable').textContent = '₹ ' + mTaxable.toLocaleString('en-IN', {minimumFractionDigits: 2});
@@ -876,36 +886,23 @@ function exportReportToExcel() {
   var sDate = document.getElementById('rep-start').value; 
   var eDate = document.getElementById('rep-end').value;
   var statFilter = document.getElementById('rep-status-filter').value;
-  
-  // Added "Status" and "Payment Date" columns
-  var csv = 'Bill No.,Client,Site,Bill Date,Status,Payment Date,Taxable Amount,CGST,SGST,Total Invoice Value\n'; 
-  var count = 0;
+  var csv = 'Bill No.,Client,Site,Bill Date,Status,Payment Date,Taxable Amount,CGST,SGST,Total Invoice Value\n'; var count = 0;
   
   for(var i=0; i<bills.length; i++) {
-    var b = bills[i]; 
-    var pass = true;
-    
-    if(b.date) { 
-        if (sDate && b.date < sDate) pass = false; 
-        if (eDate && b.date > eDate) pass = false; 
-    } else { pass = false; }
-    
+    var b = bills[i]; var pass = true;
+    if(b.date) { if (sDate && b.date < sDate) pass = false; if (eDate && b.date > eDate) pass = false; } else { pass = false; }
     if (statFilter === 'paid' && b.status !== 'Paid') pass = false;
     if (statFilter === 'pending' && b.status === 'Paid') pass = false;
-    
     if(pass) { 
         count++; 
         var pDate = b.lastPaymentDate ? fmtD(b.lastPaymentDate) : '-';
         var stat = b.status || 'Pending';
-        
         csv += '"' + (b.billNo || '').replace(/"/g, '""') + '","' + (b.toDept || '').replace(/"/g, '""') + '","' + (b.siteLoc || '').replace(/"/g, '""') + '",' + (b.date ? fmtD(b.date) : '-') + ',"' + stat + '","' + pDate + '",' + (b.totalNoGST ? b.totalNoGST.toFixed(2) : 0) + ',' + (b.cgst || 0).toFixed(2) + ',' + (b.sgst || 0).toFixed(2) + ',' + (b.say || 0) + '\n'; 
     }
   }
-  
   if(count === 0) { alert('No bills found matching these filters.'); return; }
   var link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); link.download = 'KARM_GST_Report.csv'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
-// ----------------------------------------------------
 
 function renderBills() {
   var q = (document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '');
@@ -970,7 +967,7 @@ function exportAllBillsToExcel() {
 }
 
 function loadBill(id) { var b = bills.find(x => x.id === id); if(!b) return; editId = id; document.getElementById('gst').value = b.gst || ''; document.getElementById('pan').value = b.pan || ''; document.getElementById('billno').value = b.billNo || ''; document.getElementById('siteloc').value = b.siteLoc || ''; document.getElementById('billdate').value = b.date || ''; document.getElementById('todesig').value = b.toDesig || ''; document.getElementById('todept').value = b.toDept || ''; document.getElementById('toaddr').value = b.toAddr || ''; document.getElementById('workorder').value = b.workOrder || ''; document.getElementById('cgst-r').value = b.cgstRate || 9; document.getElementById('sgst-r').value = b.sgstRate || 9; document.getElementById('drive-link').value = b.driveLink || ''; items = []; document.getElementById('wi-con').innerHTML = ''; if(b.items && b.items.length > 0) { for(var j=0; j<b.items.length; j++) addItem(b.items[j]); } else { addItem(); } showTab('create', document.querySelectorAll('.tab')[1]); recalc(); }
-function deleteBill(id) { if (confirm('Delete?')) { bills = bills.filter(function(b){ return b.id !== id; }); localStorage.setItem('karm_bills', JSON.stringify(bills)); updateClientFilter(); renderBills(); } }
+function deleteBill(id) { if (confirm('Delete?')) { bills = bills.filter(function(b){ return b.id !== id; }); localStorage.setItem('karm_bills', JSON.stringify(bills)); updateClientFilter(); renderBills(); autoSyncToCloud(true); } }
 
 function openPrint(type, id) { 
   if (type === 'bill') {
