@@ -19,12 +19,15 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 .hdr-logo { width: 50px; height: 50px; border-radius: 10px; background: #9DBcd4; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; flex-shrink: 0; box-shadow: 0 4px 10px rgba(157, 188, 212, 0.4); }
 .hdr h1 { font-size: 22px; font-weight: 700; color: #5C6B73; letter-spacing: 0.5px; }
 
-/* Settings Gear Icon & Logout */
-.hdr-actions { position: absolute; right: 25px; top: 25px; display: flex; gap: 15px; align-items: center; }
+/* Settings Gear Icon & Logout & Clock */
+.hdr-actions { position: absolute; right: 25px; top: 50%; transform: translateY(-50%); display: flex; gap: 15px; align-items: center; }
 .logout-btn { background: none; border: none; color: #ECA29B; font-weight: bold; cursor: pointer; font-size: 14px; transition: color 0.2s; }
 .logout-btn:hover { color: #C0392B; }
 .settings-gear { font-size: 22px; cursor: pointer; transition: transform 0.3s; color: #7B8A9C; }
 .settings-gear:hover { transform: rotate(90deg); color: #4A90E2; }
+#live-clock { text-align: right; margin-right: 15px; border-right: 2px solid #EAEef4; padding-right: 15px; display: flex; flex-direction: column; justify-content: center; }
+#clock-time { font-size: 15px; font-weight: 800; color: #4A90E2; letter-spacing: 0.5px; }
+#clock-date { font-size: 11px; font-weight: 600; color: #A0B2C6; text-transform: uppercase; margin-top: 2px; }
 
 /* SLIDE-OUT SIDEBAR */
 .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(200, 210, 224, 0.6); backdrop-filter: blur(3px); z-index: 999; display: none; transition: opacity 0.3s; }
@@ -231,6 +234,10 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       </div>
       
       <div class="hdr-actions">
+        <div id="live-clock" title="Current Live Date and Time">
+            <span id="clock-time">--:--:--</span>
+            <span id="clock-date">-- --- ----</span>
+        </div>
         <button class="logout-btn" onclick="logout()" title="Securely log out of the portal">Logout</button>
         <div class="settings-gear" onclick="toggleSetup()" title="Upload Images & Backup Settings">⚙️</div>
       </div>
@@ -534,14 +541,47 @@ const FIREBASE_DB_URL = "https://karm-portal-default-rtdb.firebaseio.com/";
 // DATA ARRAYS
 var bills = []; var expenses = []; var clientDB = []; var items = []; var editId = null;
 let currentPaymentBillId = null;
-var staffDB = []; var attendanceDB = []; var staffPaymentsDB = []; // NEW STAFF ARRAYS
+var staffDB = []; var attendanceDB = []; var staffPaymentsDB = []; 
 
 var today = new Date();
 var firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
 var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
 document.getElementById('rep-start').value = firstDay;
 document.getElementById('rep-end').value = lastDay;
-document.getElementById('att-date').value = new Date().toISOString().split('T')[0]; // Default staff date
+document.getElementById('att-date').value = new Date().toISOString().split('T')[0]; 
+
+// ==========================================
+// LIVE CLOCK LOGIC
+// ==========================================
+function updateClock() {
+    var now = new Date();
+    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    var dName = days[now.getDay()];
+    var mName = months[now.getMonth()];
+    var date = now.getDate();
+    var year = now.getFullYear();
+    
+    var h = now.getHours();
+    var m = now.getMinutes();
+    var s = now.getSeconds();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    
+    h = h % 12;
+    h = h ? h : 12; 
+    m = m < 10 ? '0' + m : m;
+    s = s < 10 ? '0' + s : s;
+    
+    var timeEl = document.getElementById('clock-time');
+    var dateEl = document.getElementById('clock-date');
+    if(timeEl && dateEl) {
+        timeEl.textContent = h + ':' + m + ':' + s + ' ' + ampm;
+        dateEl.textContent = dName + ', ' + date + ' ' + mName + ' ' + year;
+    }
+}
+setInterval(updateClock, 1000);
+updateClock();
 
 // ==========================================
 // APPLY SAVED LOGO TO LOGIN SCREEN EARLY
@@ -610,7 +650,6 @@ function autoSyncFromCloud() {
             var cloudAtt = dataVault.attendance || [];
             var cloudSP = dataVault.staffPayments || [];
 
-            // UPGRADED SMART SYNC SHIELD
             if (cloudBills.length >= bills.length && cloudExp.length >= expenses.length && cloudCli.length >= clientDB.length && cloudStaff.length >= staffDB.length && cloudAtt.length >= attendanceDB.length && cloudSP.length >= staffPaymentsDB.length) {
                 bills = cloudBills; localStorage.setItem('karm_bills', JSON.stringify(bills));
                 expenses = cloudExp; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
@@ -881,7 +920,7 @@ function saveAttendance() {
     var earned = staff.wage * mult;
     attendanceDB.unshift({ id: 'ATT_'+Date.now(), staffId: sId, staffName: staff.name, date: dt, site: st, mult: mult, amount: earned });
     localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
-    document.getElementById('att-site').value = ''; // keep date and shift
+    document.getElementById('att-site').value = ''; 
     showGlobalToast("✓ Shift Logged for " + staff.name + " (₹" + earned + ")", "ok");
     renderAttendanceList(); renderStaffLedger(); autoSyncToCloud(true);
 }
@@ -897,7 +936,7 @@ function renderAttendanceList() {
     var c = document.getElementById('attendance-list'); if(!c) return;
     if(attendanceDB.length === 0) { c.innerHTML = '<div class="emp">No shifts logged yet.</div>'; return; }
     var html = '<table class="btbl"><thead><tr><th>Date</th><th>Employee</th><th>Site</th><th>Shift</th><th>Earned</th><th>Action</th></tr></thead><tbody>';
-    for(var i=0; i<attendanceDB.length && i < 20; i++) { // show last 20
+    for(var i=0; i<attendanceDB.length && i < 20; i++) { 
         var a = attendanceDB[i]; 
         var shiftTxt = a.mult === 1 ? 'Full' : (a.mult === 0.5 ? 'Half' : a.mult + 'x');
         html += '<tr><td>' + fmtD(a.date) + '</td><td style="font-weight:bold; color:#5C8EAD;">' + a.staffName + '</td><td>' + a.site + '</td><td>' + shiftTxt + '</td><td style="color:#27AE60; font-weight:bold;">₹ ' + a.amount.toLocaleString('en-IN') + '</td><td><button class="btn r" style="padding:4px 10px;font-size:11px;border:none;" onclick="deleteAttendance(\'' + a.id + '\')" title="Delete this shift">🗑</button></td></tr>'; 
@@ -939,11 +978,9 @@ function paySalary(staffId, staffName, currentDue) {
     var payAmt = parseFloat(amt);
     var pDate = new Date().toISOString().split('T')[0];
     
-    // Log in Staff Payments
     staffPaymentsDB.unshift({ id: 'SP_'+Date.now(), staffId: staffId, date: pDate, amount: payAmt });
     localStorage.setItem('karm_staffPayments', JSON.stringify(staffPaymentsDB));
     
-    // Automatically Log in Global Expenses
     var expData = { type: 'expense', id: 'EXP_' + Date.now().toString(), date: pDate, desc: 'Salary Paid: ' + staffName, amount: payAmt };
     expenses.unshift(expData); localStorage.setItem('karm_expenses', JSON.stringify(expenses));
     
@@ -951,7 +988,6 @@ function paySalary(staffId, staffName, currentDue) {
     showGlobalToast("✅ Salary Paid & Expense Logged!", "ok");
 }
 function showSt2(id, msg, type) { var el = document.getElementById(id); if(!el) return; el.textContent = msg; el.className = 'st ' + type; el.style.display = 'block'; setTimeout(function(){ el.className = 'st'; el.style.display = 'none'; }, 3000); }
-// Use existing showSt logic but adapt for new div
 function showSt(id, msg, type) { if(id==='st') { var el = document.getElementById('st'); el.textContent = msg; el.className = 'st ' + type; setTimeout(function(){ el.className = 'st'; }, 3000); } else { showSt2(id, msg, type); } }
 
 // ----------------------------------------------------
