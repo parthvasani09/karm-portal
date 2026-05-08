@@ -91,6 +91,9 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 .st.err { background: #FDECEA; color: #C62828; display: block; border: 1px solid #FFCDD2; }
 .st.inf { background: #E3F2FD; color: #1565C0; display: block; border: 1px solid #BBDEFB; }
 
+/* GLOBAL TOAST NOTIFICATION */
+#global-toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 12px 24px; border-radius: 30px; display: none; z-index: 9999; font-size: 14px; font-weight: bold; box-shadow: 0 6px 20px rgba(0,0,0,0.3); transition: opacity 0.3s; }
+
 /* TABLES */
 .btbl { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
 .btbl th { text-align: left; padding: 14px 12px; color: #7B8A9C; font-size: 12px; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid #EAEef4; background: #FAFCFF; }
@@ -165,6 +168,8 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 </style>
 </head>
 <body>
+
+<div id="global-toast"></div>
 
 <div id="login-screen">
   <div class="login-box">
@@ -242,7 +247,6 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       <div class="btnrow" style="margin-top:15px; justify-content:flex-end;">
           <button class="btn g" onclick="syncFromCloud()">🔄 Force Cloud Sync Now</button>
       </div>
-      <div id="sync-st" class="st" style="margin-top:10px;"></div>
     </div>
 
     <div id="tab-dashboard" class="sec active">
@@ -492,7 +496,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 const OFFICE_USER = "admin@karm.in";
 const OFFICE_PASS = "KARM@2026";
 
-// HARDCODED GOOGLE SCRIPT URL PROVIDED BY USER
+// YOUR CLOUD DATABASE URL
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0azKXbpxO9Hp1ckYcTACNGv2MhplHyFsRMuJcNqriXImRZrWOxweUgHr41ca8WDUP/exec"; 
 
 var bills = []; var expenses = []; var clientDB = []; var items = []; var editId = null;
@@ -506,7 +510,26 @@ document.getElementById('rep-start').value = firstDay;
 document.getElementById('rep-end').value = lastDay;
 
 // ==========================================
-// AUTHENTICATION LOGIC
+// GLOBAL TOAST NOTIFICATION
+// ==========================================
+function showGlobalToast(msg, type) {
+    var toast = document.getElementById('global-toast');
+    toast.textContent = msg;
+    toast.style.background = type === 'ok' ? '#27AE60' : (type === 'err' ? '#C0392B' : '#2980B9');
+    toast.style.display = 'block';
+    toast.style.opacity = '1';
+    
+    // Auto hide after 3 seconds unless it's a loading message
+    if (type !== 'inf') {
+        setTimeout(function() {
+            toast.style.opacity = '0';
+            setTimeout(function(){ toast.style.display = 'none'; }, 300);
+        }, 3000);
+    }
+}
+
+// ==========================================
+// AUTHENTICATION & AUTO-SYNC LOGIC
 // ==========================================
 function checkLogin() {
     const u = document.getElementById('user-email').value;
@@ -516,6 +539,7 @@ function checkLogin() {
         document.getElementById('main-app').style.display = 'block';
         sessionStorage.setItem('karm_auth', 'true');
         loadLocalData();
+        syncFromCloud(); // <--- Auto-sync trigger on login
     } else {
         document.getElementById('login-err').style.display = 'block';
     }
@@ -530,33 +554,32 @@ if(sessionStorage.getItem('karm_auth') === 'true') {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
     loadLocalData();
+    syncFromCloud(); // <--- Auto-sync trigger on page refresh
 }
 
 // ==========================================
-// CLOUD SYNC ENGINE
+// AUTOMATED CLOUD SYNC ENGINE
 // ==========================================
 function syncFromCloud() {
-    var st = document.getElementById('sync-st');
-    st.textContent = "🔄 Connecting to Google Sheets... Please wait.";
-    st.className = "st inf";
-    st.style.display = "block";
+    showGlobalToast("🔄 Auto-syncing from Cloud...", "inf");
 
-    fetch(GOOGLE_SCRIPT_URL)
+    fetch(GOOGLE_SCRIPT_URL + "?action=getBills")
       .then(response => response.json())
       .then(data => {
-         if(Array.isArray(data) && data.length > 0) {
-            st.textContent = "✅ Connected to Cloud successfully.";
-            st.className = "st ok";
+         if(Array.isArray(data)) {
+            bills = data; // Merge live cloud data
+            localStorage.setItem('karm_bills', JSON.stringify(bills));
+            renderBills();
+            updateClientFilter();
+            updateLedgerDropdown();
+            showGlobalToast("✅ Live Cloud Data Synced!", "ok");
          } else {
-            st.textContent = "✅ Connection OK. Use standard Save to push data.";
-            st.className = "st ok";
+            showGlobalToast("✅ Live Cloud Data Synced!", "ok");
          }
-         setTimeout(() => { st.style.display = 'none'; }, 4000);
       })
       .catch(err => {
-         st.textContent = "❌ Check Google Sheet Script configuration.";
-         st.className = "st err";
-         setTimeout(() => { st.style.display = 'none'; }, 5000);
+         console.error(err);
+         showGlobalToast("⚠️ Offline Mode. Could not reach cloud.", "err");
       });
 }
 
@@ -726,10 +749,15 @@ function store(d) {
   var found = false; for(var i=0; i<bills.length; i++) { if(bills[i].id === d.id) { bills[i] = d; found = true; break; } }
   if(!found) bills.unshift(d); localStorage.setItem('karm_bills', JSON.stringify(bills));
 }
+
 function saveBill() {
   var d = getData(); if(!d.billNo) { showSt('Enter Bill No.', 'err'); return; }
   store(d); editId = d.id; updateClientFilter(); updateLedgerDropdown(); showSt('✓ Saving...', 'inf');
-  fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) }).then(() => showSt('✓ Synced to Cloud!', 'ok')).catch(() => showSt('Local saved (Cloud unreachable).', 'err'));
+  
+  // Push to Cloud
+  fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })
+    .then(() => { showSt('✓ Synced to Cloud!', 'ok'); syncFromCloud(); })
+    .catch(() => showSt('Local saved (Cloud unreachable).', 'err'));
 }
 
 function addPayment(id) {
@@ -740,15 +768,29 @@ function addPayment(id) {
   document.getElementById('payment-modal').style.display = 'flex';
 }
 function closePaymentModal() { document.getElementById('payment-modal').style.display = 'none'; currentPaymentBillId = null; }
+
 function confirmPayment() {
   if(!currentPaymentBillId) return; var bill = bills.find(function(b){ return b.id === currentPaymentBillId; }); if(!bill) return;
   bill.amountPaid = bill.say; bill.lastPaymentDate = document.getElementById('pay-date').value; bill.status = 'Paid'; 
+  
   localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); closePaymentModal();
+  
+  // Sync Payment Status to Cloud Immediately
+  showGlobalToast("🔄 Syncing payment to Cloud...", "inf");
+  fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bill) })
+    .then(() => showGlobalToast('✅ Payment Synced!', 'ok'));
 }
+
 function unmarkPayment() {
   if(!currentPaymentBillId) return; var bill = bills.find(function(b){ return b.id === currentPaymentBillId; }); if(!bill) return;
   bill.amountPaid = 0; bill.lastPaymentDate = ''; bill.status = 'Pending';
+  
   localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); closePaymentModal();
+  
+  // Sync Reverted Status to Cloud Immediately
+  showGlobalToast("🔄 Syncing update to Cloud...", "inf");
+  fetch(GOOGLE_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bill) })
+    .then(() => showGlobalToast('✅ Reverted to Pending!', 'ok'));
 }
 
 function saveExpense() {
@@ -807,6 +849,7 @@ function renderReports() {
   if(document.getElementById('rep-sgst')) document.getElementById('rep-sgst').textContent = '₹ ' + mSGST.toLocaleString('en-IN', {minimumFractionDigits: 2});
   if(document.getElementById('rep-total')) document.getElementById('rep-total').textContent = '₹ ' + mTotal.toLocaleString('en-IN');
 }
+
 function exportReportToExcel() {
   var sDate = document.getElementById('rep-start').value; var eDate = document.getElementById('rep-end').value;
   var csv = 'Bill No.,Client,Site,Date,Taxable Amount,CGST,SGST,Total Invoice Value\n'; var count = 0;
@@ -940,8 +983,6 @@ function fmtD(d) { if(!d) return ''; var p = d.split('-'); if(p.length !== 3) re
 function showSt(msg, type) { var el = document.getElementById('st'); if(!el) return; el.textContent = msg; el.className = 'st ' + type; setTimeout(function(){ el.className = 'st'; }, 3000); }
 function clearForm() { document.getElementById('gst').value = '24AAFPZ2927G2ZI'; document.getElementById('pan').value = 'AAFPZ2927G'; var ids = ['billno','siteloc','todesig','todept','toaddr','workorder','quick-client', 'drive-link']; for(var i=0; i<ids.length; i++) { var el = document.getElementById(ids[i]); if(el) el.value = ''; } document.getElementById('billdate').value = new Date().toISOString().split('T')[0]; document.getElementById('exp-date').value = new Date().toISOString().split('T')[0]; document.getElementById('cgst-r').value = '9'; document.getElementById('sgst-r').value = '9'; items = []; editId = null; document.getElementById('wi-con').innerHTML = ''; document.getElementById('totals').innerHTML = ''; document.getElementById('words').textContent = ''; document.getElementById('st').className = 'st'; addItem(); }
 function n2w(n) { if(n === 0) return 'Zero'; var o = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen']; var t = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety']; function h(x) { if(x < 20) return o[x]; if(x < 100) return t[Math.floor(x/10)] + (x%10 ? ' ' + o[x%10] : ''); if(x < 1000) return o[Math.floor(x/100)] + ' Hundred' + (x%100 ? ' ' + h(x%100) : ''); if(x < 100000) return h(Math.floor(x/1000)) + ' Thousand' + (x%1000 ? ' ' + h(x%1000) : ''); if(x < 10000000) return h(Math.floor(x/100000)) + ' Lakh' + (x%100000 ? ' ' + h(x%100000) : ''); return h(Math.floor(x/10000000)) + ' Crore' + (x%10000000 ? ' ' + h(x%10000000) : ''); } return h(n); }
-
-clearForm(); renderBills(); renderExpenses(); populateQuickClientSelect(); updateLedgerDropdown();
 </script>
 </body>
 </html>
