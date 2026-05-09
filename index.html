@@ -43,7 +43,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 @keyframes shine { to { background-position: 200% center; } }
 .sub-text { font-size: 20px; letter-spacing: 4px; text-transform: uppercase; opacity: 0.9; font-weight: 300; }
 
-/* STATS (MOVED TO REPORTS) */
+/* STATS (REPORTS PAGE) */
 .quick-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-bottom: 25px; }
 .stat-item { background: white; padding: 25px 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); text-align: center; border-bottom: 5px solid #4A90E2; transition: transform 0.3s; }
 .stat-item:hover { transform: translateY(-5px); }
@@ -51,7 +51,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 .stat-item p { font-size: 26px; font-weight: 900; color: #2C3E50; }
 
 /* CHARTS ROW */
-.chart-container-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+.chart-container-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 .chart-card { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
 /* FILTERS & BULK ACTIONS */
@@ -100,7 +100,6 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 
 .btnrow { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.5rem; }
 .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
-.btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(163, 177, 198, 0.25); }
 .btn.p { background: #9DBcd4; color: #FFF; } 
 .btn.g { background: #A9DFBF; color: #1E8449; } 
 .btn.r { background: #F5B7B1; color: #922B21; } 
@@ -231,7 +230,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       </div>
 
       <div class="hero-container">
-          <video id="bg-video" autoplay loop muted playsinline>
+          <video id="bg-video" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;">
               <source id="video-source" src="https://cdn.pixabay.com/video/2019/04/10/22646-328940142_large.mp4" type="video/mp4">
           </video>
           <img id="dash-welcome-img" src="" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; display:none; z-index: 1;">
@@ -245,7 +244,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       
       <div class="chart-container-row">
           <div class="chart-card">
-              <div class="ct" style="color:#4A90E2;">Revenue vs Expenses (Last 6 Months)</div>
+              <div class="ct" style="color:#4A90E2;">Revenue vs Expenses</div>
               <div style="position: relative; height: 300px; width: 100%;"><canvas id="revChart"></canvas></div>
           </div>
           <div class="chart-card">
@@ -525,7 +524,7 @@ function showGlobalToast(msg, type) {
 }
 
 // ==========================================
-// GLOBAL IMAGE & FIREBASE AUTO-SYNC LOGIC
+// FIREBASE AUTO-SYNC LOGIC (FIXED: ALWAYS MASTER)
 // ==========================================
 function getCleanDbUrl() {
     if (!FIREBASE_DB_URL || FIREBASE_DB_URL.includes("PASTE_YOUR")) return null;
@@ -534,7 +533,7 @@ function getCleanDbUrl() {
 
 function autoSyncToCloud(silent = false) {
     var url = getCleanDbUrl(); if (!url) return;
-    if(!silent) showGlobalToast("☁️ Auto-Syncing to Cloud...", "inf");
+    if(!silent) showGlobalToast("☁️ Saving to Cloud...", "inf");
 
     var dataVault = { 
         bills: bills, expenses: expenses, clients: clientDB, staff: staffDB, attendance: attendanceDB, staffPayments: staffPaymentsDB,
@@ -547,7 +546,7 @@ function autoSyncToCloud(silent = false) {
     };
     
     fetch(url + "/karm_database.json", { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataVault) })
-    .then(res => res.json()).then(() => { if(!silent) showGlobalToast("✅ Cloud Database Synced!", "ok"); })
+    .then(res => res.json()).then(() => { if(!silent) showGlobalToast("✅ Cloud Saved!", "ok"); })
     .catch(() => { if(!silent) showGlobalToast("❌ Cloud Upload Failed.", "err"); });
 }
 
@@ -555,62 +554,37 @@ function autoSyncFromCloud() {
     var url = getCleanDbUrl(); if (!url) return;
     showGlobalToast("🔄 Checking Cloud Data...", "inf");
 
-    fetch(url + "/karm_database.json").then(res => res.json()).then(dataVault => {
-        if (dataVault) {
-            var cloudBills = dataVault.bills || []; var cloudExp = dataVault.expenses || []; var cloudCli = dataVault.clients || [];
-            var cloudStaff = dataVault.staff || []; var cloudAtt = dataVault.attendance || []; var cloudSP = dataVault.staffPayments || [];
-
-            if (cloudBills.length >= bills.length && cloudExp.length >= expenses.length && cloudCli.length >= clientDB.length) {
-                bills = cloudBills; localStorage.setItem('karm_bills', JSON.stringify(bills));
-                expenses = cloudExp; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
-                clientDB = cloudCli; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
-                staffDB = cloudStaff; localStorage.setItem('karm_staff', JSON.stringify(staffDB));
-                attendanceDB = cloudAtt; localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
-                staffPaymentsDB = cloudSP; localStorage.setItem('karm_staffPayments', JSON.stringify(staffPaymentsDB));
-                
-                if(dataVault.settings) {
-                    if(dataVault.settings.logo) { localStorage.setItem('karm_logo', dataVault.settings.logo); applyLogo(dataVault.settings.logo); }
-                    if(dataVault.settings.letterhead) { localStorage.setItem('karm_lh', dataVault.settings.letterhead); document.getElementById('lh-img-preview-bill').src = dataVault.settings.letterhead; }
-                    if(dataVault.settings.video) { localStorage.setItem('karm_video', dataVault.settings.video); document.getElementById('video-source').src = dataVault.settings.video; document.getElementById('bg-video').load(); }
-                }
-                
-                renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown(); renderStaffDropdown(); renderAttendanceList(); renderStaffLedger();
-                updateDashboardStats();
-                showGlobalToast("✅ Cloud Data Synced!", "ok");
-            } else {
-                showGlobalToast("⬆️ Local data is newer. Pushing to Cloud...", "inf"); autoSyncToCloud(true);
+    fetch(url + "/karm_database.json").then(res => res.json()).then(d => {
+        if (d && (d.bills || d.expenses || d.clients || d.staff)) {
+            
+            // FIREBASE IS MASTER: ALWAYS OVERWRITE LOCAL. Fixes device mismatch bug.
+            bills = d.bills || []; localStorage.setItem('karm_bills', JSON.stringify(bills));
+            expenses = d.expenses || []; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
+            clientDB = d.clients || []; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
+            staffDB = d.staff || []; localStorage.setItem('karm_staff', JSON.stringify(staffDB));
+            attendanceDB = d.attendance || []; localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
+            staffPaymentsDB = d.staffPayments || []; localStorage.setItem('karm_staffPayments', JSON.stringify(staffPaymentsDB));
+            
+            if(d.settings) {
+                if(d.settings.logo) { localStorage.setItem('karm_logo', d.settings.logo); applyLogo(d.settings.logo); }
+                if(d.settings.letterhead) { localStorage.setItem('karm_lh', d.settings.letterhead); document.getElementById('lh-img-preview-bill').src = d.settings.letterhead; }
+                if(d.settings.video) { localStorage.setItem('karm_video', d.settings.video); document.getElementById('video-source').src = d.settings.video; document.getElementById('bg-video').load(); }
             }
-        } else {
-            showGlobalToast("✅ Connected. Cloud is empty.", "ok");
+            
+            renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown(); renderStaffDropdown(); renderAttendanceList(); renderStaffLedger();
+            updateDashboardStats();
+            showGlobalToast("✅ Cloud Data Synced!", "ok");
+            
+        } else if (!d) {
+            // Cloud is empty. Push local data to seed it.
+            showGlobalToast("☁️ Empty Cloud. Pushing local...", "inf");
             if(bills.length > 0 || expenses.length > 0 || clientDB.length > 0 || staffDB.length > 0) { autoSyncToCloud(true); }
         }
     }).catch(() => showGlobalToast("⚠️ Offline Mode. Using local data.", "err"));
 }
 
 function forceCloudBackup() { var url = getCleanDbUrl(); if (!url) { alert("Firebase URL missing."); return; } autoSyncToCloud(false); }
-function forceCloudRestore() {
-    var url = getCleanDbUrl(); if (!url) { alert("Firebase URL missing."); return; }
-    showGlobalToast("🔄 Forcing Download from Cloud...", "inf");
-    fetch(url + "/karm_database.json").then(res => res.json()).then(dataVault => {
-        if(dataVault) {
-            bills = dataVault.bills || []; localStorage.setItem('karm_bills', JSON.stringify(bills));
-            expenses = dataVault.expenses || []; localStorage.setItem('karm_expenses', JSON.stringify(expenses));
-            clientDB = dataVault.clients || []; localStorage.setItem('karm_clients', JSON.stringify(clientDB));
-            staffDB = dataVault.staff || []; localStorage.setItem('karm_staff', JSON.stringify(staffDB));
-            attendanceDB = dataVault.attendance || []; localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
-            staffPaymentsDB = dataVault.staffPayments || []; localStorage.setItem('karm_staffPayments', JSON.stringify(staffPaymentsDB));
-            
-            if(dataVault.settings) {
-                if(dataVault.settings.logo) { localStorage.setItem('karm_logo', dataVault.settings.logo); applyLogo(dataVault.settings.logo); }
-                if(dataVault.settings.letterhead) { localStorage.setItem('karm_lh', dataVault.settings.letterhead); document.getElementById('lh-img-preview-bill').src = dataVault.settings.letterhead; }
-                if(dataVault.settings.video) { localStorage.setItem('karm_video', dataVault.settings.video); document.getElementById('video-source').src = dataVault.settings.video; document.getElementById('bg-video').load(); }
-            }
-            renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown(); renderStaffDropdown(); renderAttendanceList(); renderStaffLedger();
-            updateDashboardStats();
-            showGlobalToast("✅ Cloud Data Forced Restored!", "ok");
-        }
-    });
-}
+function forceCloudRestore() { autoSyncFromCloud(); }
 
 function downloadBackup() {
     var dataVault = { bills: bills, expenses: expenses, clients: clientDB, staff: staffDB, attendance: attendanceDB, staffPayments: staffPaymentsDB, timestamp: new Date().toISOString() };
@@ -639,34 +613,17 @@ function restoreBackup(event) {
 }
 
 // ==========================================
-// ANIMATIONS & CHARTS 
+// CHARTS & STATS UPDATE (FIXED ZERO BUG)
 // ==========================================
-function animateValue(id, start, end, duration, isCurrency=false) {
-    let obj = document.getElementById(id); if(!obj) return;
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const prog = Math.min((timestamp - startTimestamp) / duration, 1);
-        let curr = Math.floor(prog * (end - start) + start);
-        obj.innerHTML = isCurrency ? '₹ ' + curr.toLocaleString('en-IN') : curr;
-        if (prog < 1) window.requestAnimationFrame(step);
-        else obj.innerHTML = isCurrency ? '₹ ' + end.toLocaleString('en-IN') : end;
-    };
-    window.requestAnimationFrame(step);
-}
-
 let revChartInst = null; let pieChartInst = null;
 
-// The critical fix: ensuring charts always draw when Dashboard is active
 function drawCharts() {
     if(typeof Chart === 'undefined') {
-        setTimeout(drawCharts, 500); // Retry if library is slow to load
-        return; 
+        setTimeout(drawCharts, 500); return; 
     }
     
-    // Revenue vs Expense
+    // Revenue vs Expense (Doughnut Chart as requested)
     const revCanvas = document.getElementById('revChart');
-    // If the canvas doesn't exist or is currently hidden, skip drawing to avoid resizing bugs
     if(!revCanvas || revCanvas.offsetParent === null) return; 
     
     let p = 0, r = 0, e = 0;
@@ -675,12 +632,12 @@ function drawCharts() {
 
     if(revChartInst) revChartInst.destroy();
     revChartInst = new Chart(revCanvas, {
-        type: 'bar',
-        data: { labels: ['Pending', 'Received', 'Expenses'], datasets: [{ data: [p, r, e], backgroundColor: ['#F39C12', '#27AE60', '#C0392B'], borderRadius: 5 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        type: 'doughnut', // CHANGED FROM BAR TO CIRCULAR CHART
+        data: { labels: ['Pending', 'Received', 'Expenses'], datasets: [{ data: [p, r, e], backgroundColor: ['#F39C12', '#27AE60', '#C0392B'] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
     });
 
-    // Pie Chart
+    // Expense Breakdown (Pie Chart)
     const pieCanvas = document.getElementById('expPieChart');
     if(!pieCanvas || pieCanvas.offsetParent === null) return;
     
@@ -712,12 +669,12 @@ function updateDashboardStats() {
     });
     expenses.forEach(ex => e += ex.amount);
 
-    // Update Reports Tab Elements ONLY (Since dashboard stats were moved)
-    animateValue('rep-count-top', 0, bills.length, 1000);
-    animateValue('rep-pend-top', 0, p, 1500, true);
-    animateValue('rep-paid-top', 0, r, 1500, true);
-    animateValue('rep-exp-top', 0, e, 1500, true);
-    animateValue('rep-prof-top', 0, r-e, 1500, true);
+    // FIXED: Directly assign text to avoid zero-bug on hidden tabs
+    let rc = document.getElementById('rep-count-top'); if(rc) rc.textContent = bills.length;
+    let rp = document.getElementById('rep-pend-top'); if(rp) rp.textContent = '₹ ' + p.toLocaleString('en-IN');
+    let rpa = document.getElementById('rep-paid-top'); if(rpa) rpa.textContent = '₹ ' + r.toLocaleString('en-IN');
+    let re = document.getElementById('rep-exp-top'); if(re) re.textContent = '₹ ' + e.toLocaleString('en-IN');
+    let rpr = document.getElementById('rep-prof-top'); if(rpr) rpr.textContent = '₹ ' + (r-e).toLocaleString('en-IN');
 
     // Overdue Banner
     let banner = document.getElementById('overdue-banner');
@@ -803,7 +760,7 @@ function showTab(t, el) {
   document.getElementById('tab-'+t).classList.add('active'); if(el) el.classList.add('active');
   document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show');
   
-  if(t === 'dashboard') { updateDashboardStats(); setTimeout(drawCharts, 50); } // Small timeout ensures tab is fully rendered before Chart.js tries to calculate size
+  if(t === 'dashboard') { updateDashboardStats(); setTimeout(drawCharts, 50); } 
   if(t === 'records' || t === 'reports') { updateClientFilter(); updateLedgerDropdown(); renderBills(); }
   if(t === 'reports') { updateDashboardStats(); }
   if(t === 'expenses') renderExpenses(); if(t === 'clients') renderClients(); 
@@ -955,7 +912,7 @@ function store(d) {
 function saveBill() {
   var d = getData(); if(!d.billNo) { showSt('st', 'Enter Bill No.', 'err'); return; }
   store(d); editId = null; updateClientFilter(); updateLedgerDropdown(); 
-  showSt('st', '✓ Bill Saved!', 'ok'); renderBills(); updateDashboardStats(); autoSyncToCloud(false);
+  showSt('st', '✓ Bill Saved!', 'ok'); renderBills(); updateDashboardStats(); autoSyncToCloud(true);
 }
 
 // BULK ACTIONS
@@ -1016,12 +973,12 @@ function closePaymentModal() { document.getElementById('payment-modal').style.di
 function confirmPayment() {
   if(!currentPaymentBillId) return; var bill = bills.find(function(b){ return b.id === currentPaymentBillId; }); if(!bill) return;
   bill.amountPaid = bill.say; bill.lastPaymentDate = document.getElementById('pay-date').value; bill.status = 'Paid'; 
-  localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); updateDashboardStats(); closePaymentModal(); autoSyncToCloud(false);
+  localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); updateDashboardStats(); closePaymentModal(); autoSyncToCloud(true);
 }
 function unmarkPayment() {
   if(!currentPaymentBillId) return; var bill = bills.find(function(b){ return b.id === currentPaymentBillId; }); if(!bill) return;
   bill.amountPaid = 0; bill.lastPaymentDate = ''; bill.status = 'Pending';
-  localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); updateDashboardStats(); closePaymentModal(); autoSyncToCloud(false);
+  localStorage.setItem('karm_bills', JSON.stringify(bills)); renderBills(); updateDashboardStats(); closePaymentModal(); autoSyncToCloud(true);
 }
 
 function saveExpense() {
@@ -1143,9 +1100,9 @@ function renderBills() {
         statusBtn = '<div style="display:flex; flex-direction:column; align-items:flex-start;"><button class="btn" style="padding:6px 12px;font-size:11px;background:#FFF9E6;color:#F39C12;border:none;" onclick="addPayment(\'' + b.id + '\')">⏳ PENDING</button></div>'; 
     }
 
-    var docBtn = (b.driveLink && b.driveLink.trim() !== '') ? '<a href="' + (b.driveLink.startsWith('http')?b.driveLink:'https://'+b.driveLink) + '" target="_blank" class="btn" style="padding:4px 8px;font-size:11px;background:#E3F2FD;color:#2980B9;border:none;text-decoration:none;">📁</a>' : '';
+    var docBtn = (b.driveLink && b.driveLink.trim() !== '') ? '<a href="' + (b.driveLink.startsWith('http')?b.driveLink:'https://'+b.driveLink) + '" target="_blank" class="btn" style="padding:4px 8px;font-size:11px;background:#E3F2FD;color:#2980B9;border:none;text-decoration:none;" title="Open attached Google Drive Link">📁</a>' : '';
 
-    html += '<tr><td><input type="checkbox" class="b-chk" value="'+b.id+'" onchange="toggleBulkCheck()"></td><td style="font-weight:700; color:#5C6B73;">' + (b.billNo||'-') + '</td><td style="color:#7B8A9C;">' + (b.toDept||'-') + '</td><td style="color:#7B8A9C;">' + (b.date ? fmtD(b.date) : '-') + '</td><td style="color:#7B8A9C;">₹ ' + baseAmtStr + '</td><td style="color:#7B8A9C;">' + gstPct + '%</td><td style="color:#7B8A9C;">₹ ' + gstAmtStr + '</td><td style="font-weight:700; color:#4A90E2;">₹ ' + finalAmtStr + '</td><td style="vertical-align:middle; text-align:left;">' + statusBtn + '</td><td style="display:flex;gap:5px;flex-wrap:wrap;min-width:160px;"><button class="btn" style="padding:4px 8px;font-size:11px;border:1px solid #DDE4EE;" onclick="loadBill(\'' + b.id + '\')">✎</button><button class="btn" style="padding:4px 8px;font-size:11px;border:1px solid #DDE4EE;" onclick="duplicateBill(\'' + b.id + '\')">📄</button><button class="btn" style="padding:4px 8px;font-size:11px;background:#F5CBA7;color:#D35400;border:none;" onclick="openPrint(\'bill\', \'' + b.id + '\')">🖨</button>' + docBtn + '<button class="btn" style="padding:4px 8px;font-size:11px;background:#FADBD8;color:#C0392B;border:none;" onclick="deleteBill(\'' + b.id + '\')">✕</button></td></tr>';
+    html += '<tr><td><input type="checkbox" class="b-chk" value="'+b.id+'" onchange="toggleBulkCheck()"></td><td style="font-weight:700; color:#5C6B73;">' + (b.billNo||'-') + '</td><td style="color:#7B8A9C;">' + (b.toDept||'-') + '</td><td style="color:#7B8A9C;">' + (b.date ? fmtD(b.date) : '-') + '</td><td style="color:#7B8A9C;">₹ ' + baseAmtStr + '</td><td style="color:#7B8A9C;">' + gstPct + '%</td><td style="color:#7B8A9C;">₹ ' + gstAmtStr + '</td><td style="font-weight:700; color:#4A90E2;">₹ ' + finalAmtStr + '</td><td style="vertical-align:middle; text-align:left;">' + statusBtn + '</td><td style="display:flex;gap:5px;flex-wrap:wrap;min-width:160px;"><button class="btn" style="padding:4px 8px;font-size:11px;border:1px solid #DDE4EE;" onclick="loadBill(\'' + b.id + '\')" title="Edit this bill">✎</button><button class="btn" style="padding:4px 8px;font-size:11px;border:1px solid #DDE4EE;" onclick="duplicateBill(\'' + b.id + '\')" title="Duplicate Bill">📄</button><button class="btn" style="padding:4px 8px;font-size:11px;background:#F5CBA7;color:#D35400;border:none;" onclick="openPrint(\'bill\', \'' + b.id + '\')" title="Print or preview this bill">🖨</button>' + docBtn + '<button class="btn" style="padding:4px 8px;font-size:11px;background:#FADBD8;color:#C0392B;border:none;" onclick="deleteBill(\'' + b.id + '\')" title="Permanently delete this bill">✕</button></td></tr>';
   }
   c.innerHTML = html + '</tbody></table>';
 }
@@ -1159,9 +1116,6 @@ function exportAllBillsToExcel() {
   if(bills.length === 0) { return; } 
   var link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); link.download = 'KARM_All_Bills.csv'; document.body.appendChild(link); link.click(); document.body.removeChild(link); 
 }
-
-function loadBill(id) { var b = bills.find(x => x.id === id); if(!b) return; editId = id; document.getElementById('gst').value = b.gst || ''; document.getElementById('pan').value = b.pan || ''; document.getElementById('billno').value = b.billNo || ''; document.getElementById('siteloc').value = b.siteLoc || ''; document.getElementById('billdate').value = b.date || ''; document.getElementById('todesig').value = b.toDesig || ''; document.getElementById('todept').value = b.toDept || ''; document.getElementById('toaddr').value = b.toAddr || ''; document.getElementById('workorder').value = b.workOrder || ''; document.getElementById('cgst-r').value = b.cgstRate || 9; document.getElementById('sgst-r').value = b.sgstRate || 9; document.getElementById('drive-link').value = b.driveLink || ''; items = []; document.getElementById('wi-con').innerHTML = ''; if(b.items && b.items.length > 0) { for(var j=0; j<b.items.length; j++) addItem(b.items[j]); } else { addItem(); } showTab('create', document.querySelectorAll('.tab')[1]); recalc(); }
-function deleteBill(id) { if (confirm('Delete?')) { bills = bills.filter(function(b){ return b.id !== id; }); localStorage.setItem('karm_bills', JSON.stringify(bills)); updateClientFilter(); renderBills(); updateDashboardStats(); autoSyncToCloud(true); } }
 
 function openPrint(type, id) { 
   if (type === 'bill') {
