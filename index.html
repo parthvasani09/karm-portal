@@ -30,7 +30,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 #clock-date { font-size: 11px; font-weight: 600; color: #A0B2C6; text-transform: uppercase; margin-top: 2px; }
 
 /* CRAZY ANIMATED DASHBOARD STYLES */
-.hero-container { position: relative; width: 100%; height: 450px; border-radius: 20px; overflow: hidden; background: #000; margin-bottom: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+.hero-container { position: relative; width: 100%; height: 500px; border-radius: 20px; overflow: hidden; background: #000; margin-bottom: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
 #bg-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translate(-50%, -50%); object-fit: cover; opacity: 0.7; }
 
 .hero-overlay { 
@@ -69,9 +69,9 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 @keyframes shine { to { background-position: 200% center; } }
 .sub-text { font-size: 18px; letter-spacing: 4px; text-transform: uppercase; opacity: 0.9; font-weight: 300; color: #E8F0FE; }
 
-/* RECENT ACTIVITY BAR */
-.quick-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-top: -40px; position: relative; z-index: 5; padding: 0 20px; margin-bottom: 20px; }
-.stat-item { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; border-bottom: 4px solid #4A90E2; }
+/* RECTANGULAR STATS TABS (MOVED TO REPORTS) */
+.quick-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-bottom: 25px; }
+.stat-item { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(163, 177, 198, 0.1); text-align: center; border-bottom: 4px solid #4A90E2; }
 .stat-item h4 { font-size: 11px; color: #A0B2C6; margin-bottom: 5px; text-transform: uppercase; font-weight: 800;}
 .stat-item p { font-size: 22px; font-weight: 800; color: #5C6B73; }
 
@@ -211,8 +211,10 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
   <div class="login-box">
       <img id="login-logo-preview" src="" alt="Firm Logo" style="max-height: 60px; max-width: 150px; margin: 0 auto 15px auto; display: none; border-radius: 6px;">
       <div class="hdr-logo" id="login-logo-fallback" style="margin: 0 auto 15px auto;">K</div>
+      
       <h2>KARM Consultancy Services</h2>
       <p>Authorized Office Access Only</p>
+      
       <input type="text" id="user-email" placeholder="Username" title="Enter your office email">
       <input type="password" id="user-pass" placeholder="Password" title="Enter your secure password">
       <button onclick="checkLogin()" title="Click to log in to the portal">Secure Login</button>
@@ -304,23 +306,16 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
 
     <div id="tab-dashboard" class="sec active">
       <div class="hero-container">
-          <video id="bg-video" autoplay loop muted playsinline>
+          <video id="bg-video" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;">
               <source id="video-source" src="https://cdn.pixabay.com/video/2019/04/10/22646-328940142_large.mp4" type="video/mp4">
           </video>
-          <div class="hero-overlay">
+          <img id="dash-welcome-img" src="" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; display:none; z-index: 1;">
+          <div class="hero-overlay" style="z-index: 2;">
               <div class="glass-card">
                   <h2 class="glow-text">Welcome</h2>
                   <p class="sub-text">KARM Consultancy Services</p>
               </div>
           </div>
-      </div>
-      
-      <div class="quick-stats">
-          <div class="stat-item" style="border-color: #4A90E2;"><h4>Total Bills</h4><p id="dash-count-top">0</p></div>
-          <div class="stat-item" style="border-color: #F39C12;"><h4>Pending</h4><p id="dash-pend-top">₹ 0</p></div>
-          <div class="stat-item" style="border-color: #27AE60;"><h4>Received</h4><p id="dash-paid-top">₹ 0</p></div>
-          <div class="stat-item" style="border-color: #E74C3C;"><h4>Expenses</h4><p id="dash-exp-top">₹ 0</p></div>
-          <div class="stat-item" style="border-color: #8E44AD;"><h4>Net Profit</h4><p id="dash-prof-top">₹ 0</p></div>
       </div>
     </div>
 
@@ -460,6 +455,15 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
     </div>
 
     <div id="tab-reports" class="sec">
+      <div class="ct" style="margin-bottom: 15px;">Global Financial Overview</div>
+      <div class="quick-stats">
+          <div class="stat-item" style="border-color: #4A90E2;"><h4 title="Total number of bills created">TOTAL BILLS</h4><p id="dash-global-count">0</p></div>
+          <div class="stat-item" style="border-color: #F39C12;"><h4 title="Total amount unpaid by clients">PENDING</h4><p id="dash-global-pending">₹ 0</p></div>
+          <div class="stat-item" style="border-color: #27AE60;"><h4 title="Total amount received from clients">RECEIVED</h4><p id="dash-global-paid">₹ 0</p></div>
+          <div class="stat-item" style="border-color: #E74C3C;"><h4 title="Total business expenses logged">EXPENSES</h4><p id="dash-global-expenses">₹ 0</p></div>
+          <div class="stat-item" style="border-color: #8E44AD;"><h4 title="Total Received minus Total Expenses">NET PROFIT</h4><p id="dash-global-profit">₹ 0</p></div>
+      </div>
+
       <div class="card" style="background:#F4F9F5; border-color:#D5F5E3; margin-bottom:1.5rem;">
         <div class="ct" style="color:#27AE60; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
           <span>📋 Client Account Statement (Ledger)</span>
@@ -507,6 +511,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
       <button class="pc-print" onclick="doPrint()" title="Print this document">🖨 Print / Save PDF</button>
       <button class="pc-close" onclick="closePrint()" title="Close Print Preview">✕ Close</button>
     </div>
+    
     <div id="bill-page" class="print-page">
       <img class="lh-img" id="lh-img-preview-bill" src="" alt="Letterhead here">
       <div class="bill-body">
@@ -522,6 +527,7 @@ body { background: #F7F9FC; color: #4A5568; overflow-x: hidden; }
         <div class="b-sign" id="pr-sign">Sign :</div>
       </div>
     </div>
+
     <div id="ledger-page" class="print-page">
       <div class="ledger-body">
         <div style="text-align:center; margin-bottom:20pt;">
@@ -580,6 +586,18 @@ function updateClock() {
 setInterval(updateClock, 1000); updateClock();
 
 // ==========================================
+// APPLY SAVED LOGO TO LOGIN SCREEN EARLY
+// ==========================================
+try {
+    if (localStorage.getItem('karm_logo')) {
+        var lLogo = document.getElementById('login-logo-preview');
+        var lFall = document.getElementById('login-logo-fallback');
+        if(lLogo) { lLogo.src = localStorage.getItem('karm_logo'); lLogo.style.display = 'block'; }
+        if(lFall) { lFall.style.display = 'none'; }
+    }
+} catch(e) {}
+
+// ==========================================
 // TOAST NOTIFICATIONS
 // ==========================================
 function showGlobalToast(msg, type) {
@@ -601,7 +619,6 @@ function autoSyncToCloud(silent = false) {
     var url = getCleanDbUrl(); if (!url) return;
     if(!silent) showGlobalToast("☁️ Auto-Syncing to Cloud...", "inf");
 
-    // NEW: Capturing Local Images to push to Firebase permanently!
     var dataVault = { 
         bills: bills, expenses: expenses, clients: clientDB, staff: staffDB, attendance: attendanceDB, staffPayments: staffPaymentsDB,
         settings: {
@@ -634,29 +651,16 @@ function autoSyncFromCloud() {
                 attendanceDB = cloudAtt; localStorage.setItem('karm_attendance', JSON.stringify(attendanceDB));
                 staffPaymentsDB = cloudSP; localStorage.setItem('karm_staffPayments', JSON.stringify(staffPaymentsDB));
                 
-                // RESTORE IMAGES GLOBALLY FROM CLOUD!
                 if(dataVault.settings) {
-                    if(dataVault.settings.logo) {
-                        localStorage.setItem('karm_logo', dataVault.settings.logo);
-                        applyLogo(dataVault.settings.logo);
-                    }
-                    if(dataVault.settings.letterhead) {
-                        localStorage.setItem('karm_lh', dataVault.settings.letterhead);
-                        document.getElementById('lh-img-preview-bill').src = dataVault.settings.letterhead;
-                    }
-                    if(dataVault.settings.video) {
-                        localStorage.setItem('karm_video', dataVault.settings.video);
-                        document.getElementById('video-source').src = dataVault.settings.video;
-                        document.getElementById('bg-video').load();
-                    }
+                    if(dataVault.settings.logo) { localStorage.setItem('karm_logo', dataVault.settings.logo); applyLogo(dataVault.settings.logo); }
+                    if(dataVault.settings.letterhead) { localStorage.setItem('karm_lh', dataVault.settings.letterhead); document.getElementById('lh-img-preview-bill').src = dataVault.settings.letterhead; }
+                    if(dataVault.settings.video) { localStorage.setItem('karm_video', dataVault.settings.video); document.getElementById('video-source').src = dataVault.settings.video; document.getElementById('bg-video').load(); }
                 }
                 
-                renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown();
-                renderStaffDropdown(); renderAttendanceList(); renderStaffLedger();
+                renderBills(); renderExpenses(); renderClients(); populateQuickClientSelect(); updateLedgerDropdown(); renderStaffDropdown(); renderAttendanceList(); renderStaffLedger();
                 showGlobalToast("✅ Cloud Data Synced!", "ok");
             } else {
-                showGlobalToast("⬆️ Local data is newer. Pushing to Cloud...", "inf");
-                autoSyncToCloud(true);
+                showGlobalToast("⬆️ Local data is newer. Pushing to Cloud...", "inf"); autoSyncToCloud(true);
             }
         } else {
             showGlobalToast("✅ Connected. Cloud is empty.", "ok");
@@ -740,10 +744,7 @@ function loadLocalData() {
     if (localStorage.getItem('karm_staffPayments')) staffPaymentsDB = JSON.parse(localStorage.getItem('karm_staffPayments'));
     if (localStorage.getItem('karm_lh')) document.getElementById('lh-img-preview-bill').src = localStorage.getItem('karm_lh');
     if (localStorage.getItem('karm_logo')) applyLogo(localStorage.getItem('karm_logo'));
-    if (localStorage.getItem('karm_video')) {
-      document.getElementById('video-source').src = localStorage.getItem('karm_video');
-      document.getElementById('bg-video').load();
-    }
+    if (localStorage.getItem('karm_video')) { document.getElementById('video-source').src = localStorage.getItem('karm_video'); document.getElementById('bg-video').load(); }
   } catch(e) {}
   clearForm(); renderBills(); renderExpenses(); populateQuickClientSelect(); updateLedgerDropdown(); renderStaffDropdown(); renderAttendanceList(); renderStaffLedger();
 }
@@ -772,8 +773,7 @@ function compressAndSave(file, storageKey, imgIds, maxWidth, quality, successMsg
         localStorage.setItem(storageKey, dataUrl);
         if(storageKey === 'karm_logo') applyLogo(dataUrl);
         else imgIds.forEach(id => { var t = document.getElementById(id); if (t) { t.src = dataUrl; t.style.display = 'block'; } });
-        alert(successMsg);
-        autoSyncToCloud(true); // SYNC IMAGES TO FIREBASE GLOBALLY!
+        alert(successMsg); autoSyncToCloud(true);
       } catch(err) { alert('ERROR: Image too large to compress.'); }
     };
     img.src = e.target.result;
@@ -1048,12 +1048,17 @@ function renderBills() {
     if(matchQ && matchClient && matchDate) { f.push(b); }
     globalPaid += amtPaid; globalPending += amtDue;
   }
-  var gpEl = document.getElementById('dash-global-pending'); if(gpEl) gpEl.textContent = '₹ ' + globalPending.toLocaleString('en-IN');
-  var gdEl = document.getElementById('dash-global-paid'); if(gdEl) gdEl.textContent = '₹ ' + globalPaid.toLocaleString('en-IN');
-  var gcEl = document.getElementById('dash-global-count'); if(gcEl) gcEl.textContent = globalCount;
-  var gExEl = document.getElementById('dash-global-expenses'); if(gExEl) gExEl.textContent = '₹ ' + totalExpenses.toLocaleString('en-IN');
-  var netProfit = globalPaid - totalExpenses; var gPrEl = document.getElementById('dash-global-profit'); 
-  if(gPrEl) { gPrEl.textContent = '₹ ' + netProfit.toLocaleString('en-IN'); gPrEl.style.color = netProfit >= 0 ? '#0277BD' : '#C62828'; }
+  
+  // Dashboard Updates
+  var dpgEl = document.getElementById('dash-global-pending'); if(dpgEl) dpgEl.textContent = '₹ ' + globalPending.toLocaleString('en-IN');
+  var dpgElT = document.getElementById('dash-global-paid'); if(dpgElT) dpgElT.textContent = '₹ ' + globalPaid.toLocaleString('en-IN');
+  var dgcEl = document.getElementById('dash-global-count'); if(dgcEl) dgcEl.textContent = globalCount;
+  var dgeEl = document.getElementById('dash-global-expenses'); if(dgeEl) dgeEl.textContent = '₹ ' + totalExpenses.toLocaleString('en-IN');
+  
+  var netProfit = globalPaid - totalExpenses; 
+  var dgpEl = document.getElementById('dash-global-profit'); 
+  if(dgpEl) { dgpEl.textContent = '₹ ' + netProfit.toLocaleString('en-IN'); dgpEl.style.color = netProfit >= 0 ? '#5C6B73' : '#C62828'; }
+  
   renderReports(); generateLedger();
   var c = document.getElementById('bills-list'); if(!c) return;
   if(f.length === 0) { c.innerHTML = '<div class="emp">No bills found.</div>'; return; }
